@@ -1,1 +1,9 @@
 Practicing C code
+gcc - o main -g main.c permute.c
+
+gid add main.c permutation.c
+git commit -m "Initial commit of string permutaion"
+git push origin master
+
+git remote -v
+git diff --name-only
