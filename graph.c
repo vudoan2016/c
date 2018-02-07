@@ -1,45 +1,49 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "graph.h"
 #include "queue.h"
 
 static void add_vertex(vertex_t adj[][MAX_VERTICES], int x, int y)
 {
-  printf("%s: adding vertex %d, %d\n", __FUNCTION__, x, y);
   adj[x][y].weight = 1;
-  adj[x][0].val = x;
+  adj[x][0].id = x;
   adj[x][0].visited = false;
 }
 
 static void remove_vertex(vertex_t adj[][MAX_VERTICES], int x, int y)
 {
   adj[x][y].weight = 0;
-  adj[x][y].weight = 0;
-  adj[x][0].val = 0;
+  adj[x][0].id = 0;
+  adj[x][0].visited = false;
 }
 
-static void bfs(vertex_t adj[][MAX_VERTICES], vertex_t *v)
+static void bfs(vertex_t adj[][MAX_VERTICES], int vertex)
 {
-  int i, val;
-  queue_t *q;
+  int i, v;
+  queue_t *q = calloc(1, sizeof(queue_t));
 
-  enqueue(q, v->val);
+  printf("BFS from source %d\n", vertex);
+  queue_init(q);
+  enqueue(q, vertex);
+  adj[vertex][0].visited = true;
   while (!queue_is_empty(q)) {
-    val = dequeue(q);
-    adj[val][0].visited = true;
+    v = dequeue(q);
     for (i = 0; i < MAX_VERTICES; i++) {
-      if (adj[val][i].weight && !adj[i][0].visited) {
-	printf("Enqueueing neighbor %d\n", i);
+      if (adj[v][i].weight && !adj[i][0].visited) {
 	enqueue(q, i);
+	adj[i][0].visited = true;
       }
     }
-    printf("%d\n", val);
+    printf("%d\n", v);
   }
 
   for (i = 0; i < MAX_VERTICES; i++) {
     adj[i][0].visited = false;
   }
+
+  free(q);
 }
 
 void graph_test()
@@ -47,8 +51,8 @@ void graph_test()
   vertex_t adj[MAX_VERTICES][MAX_VERTICES];
   char *data_file = "graph_data.txt";
   FILE *fp;
-  int x, y, i, j;
-  
+  int x, y;
+
   memset(adj[0], 0, sizeof(vertex_t)*MAX_VERTICES*MAX_VERTICES);
 
   if ((fp = fopen(data_file, "r")) == NULL) {
@@ -61,15 +65,10 @@ void graph_test()
     }
   }
 
-  for (i = 0; i < MAX_VERTICES; i++) {
-    for (j = 0; j < MAX_VERTICES; j++) {
-      if (adj[i][j].weight) {
-	printf("vertex %d, neighbor %d\n", adj[i][0].val, j);
-      }
-    }
-  }
-
-  bfs(adj, &adj[2][0]);
-
+  bfs(adj, 2);
+  bfs(adj, 1);
+  bfs(adj, 0);
+  bfs(adj, 3);
+  
   fclose(fp);
 }

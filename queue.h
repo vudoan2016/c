@@ -40,8 +40,9 @@ static inline bool enqueue(queue_t *q, int elem)
 
 static int dequeue(queue_t *q)
 {
+  int data = q->q[q->head];
   q->head = (q->head + 1) % QUEUE_MAX;
-  return q->q[q->head];
+  return data;
 }
 
 #endif

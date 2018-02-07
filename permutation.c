@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 static void swap(char *a, char *b)
 {
@@ -70,12 +71,20 @@ static void iter_permute(char *str)
   }
 }
 
-void string_test()
+/*
+ * Rabin-Karp rolling hash implementation.
+ */
+bool verify()
+{
+
+}
+
+void permutation_test()
 {
   char str[] = "abc";
   int index = 0;
 
   permute(str, strlen(str), &index);
-
+  
   iter_permute(str);
 }

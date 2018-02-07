@@ -1,6 +1,7 @@
 #ifndef __HEADERS_h
 #define __HEADERS_H
 
-void string_test();
+void permutation_test();
+void graph_test();
 
 #endif

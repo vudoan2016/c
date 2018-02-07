@@ -6,7 +6,7 @@
 typedef struct vertex_s {
   int weight;
   bool visited;
-  int val;
+  int id;
 } vertex_t;
 
 #endif

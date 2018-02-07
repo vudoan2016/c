@@ -2,5 +2,6 @@
 
 void main()
 {
-  string_test();
+  permutation_test();
+  graph_test();
 }
