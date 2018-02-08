@@ -3,5 +3,6 @@
 
 void permutation_test();
 void graph_test();
+void heap_test();
 
 #endif
