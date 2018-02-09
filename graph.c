@@ -46,17 +46,102 @@ static void bfs(vertex_t adj[][MAX_VERTICES], int vertex)
   free(q);
 }
 
+void find_shortest_path(adj_list_vertex_t *adj[MAX_VERTICES], int source)
+{
+  int i;
+  heap_t *h;
+  
+  for (i = 0; i < MAX_VERTICES; i++) {
+    if (adj[i]) {
+      adj[i]->visited = false;
+      neighbor = adj[i]->neighbor;
+      while (neighbor) {
+	neighbor->dist = INFINITY;
+	neighbor = neighbor->neighbor;
+      }
+    }
+  }
+
+  h = calloc(1, sizeof(heap_t));
+  heap_init(h);
+  heap_insert(h, source);
+
+  adj[source]->dist = 0;
+  while (heap_is_empty(h) == false) {
+    v = heap_delete(h);
+    neighbor = adj[v]->neighbor;
+    while (neighbor) {
+      new_dist = neighbor->dist + neighbor->weight;
+      if (new_dist < neighbor->dist) {
+	neighbor->dist = new_dist;
+	adj[neighbor->vertex]->predecessor = v;
+      }
+      if (neighbor->visited == false) {
+	heap_insert(neighbor->vertex);
+      }
+      neighbor = neighbor->neighbor;
+    }
+    adj[v]->visited = true;
+  }
+  heap_destroy(h);
+  free(h);
+}
+
+void adj_list_add_vertex(adj_list_vertex_t *adj[MAX_VERTICES], int vertex,
+			int neighbor, int weight)
+{
+  adj_list_vertex_t *neighbor_p;
+
+  if (adj[vertex] == NULL) {
+    adj[vertex] = calloc(1, sizeof(adj_list_vertex_t));
+    adj[vertex]->vertex = vertex;
+  }
+
+  neighbor_p = calloc(1, sizeof(adj_list_vertex_t));
+  neighbor_p->neighbor = adj[vertex]->neighbor;
+  neighbor_p->vertex = neighbor;
+  neighbor_p->weight = weight;
+  neighbor_p->predecessor = 0;
+  adj[vertex]->neighbor = neighbor_p;
+}
+
+static void adj_list_print(adj_list_vertex_t *adj[MAX_VERTICES])
+{
+  int i;
+  adj_list_vertex_t *neighbor;
+  
+  for (i = 0; i < MAX_VERTICES; i++) {
+    if (adj[i] != NULL) {
+      printf("Vertex: %d, neighbors at ", adj[i]->vertex);
+      neighbor = adj[i]->neighbor;
+      while (neighbor) {
+	printf("vertex %d, weight %d\n", neighbor->vertex, neighbor->weight);
+	neighbor = neighbor->neighbor;
+      }
+    }
+    printf("\n");
+  }
+}
+
+static void
+adj_list_remove_vertex(adj_list_vertex_t *adj[MAX_VERTICES], int vertex)
+{
+}
+
 void graph_test()
 {
   vertex_t adj[MAX_VERTICES][MAX_VERTICES];
   char *data_file = "graph_data.txt";
+  char *data_file_1 = "graph_data1.txt";
   FILE *fp;
-  int x, y;
-
+  int x, y, weight;
+  adj_list_vertex_t *adj_list[MAX_VERTICES] = {NULL};
+  
   memset(adj[0], 0, sizeof(vertex_t)*MAX_VERTICES*MAX_VERTICES);
 
   if ((fp = fopen(data_file, "r")) == NULL) {
     printf("Unable to open file %s\n", data_file);
+    return;
   }
 
   while (!feof(fp)) {
@@ -70,5 +155,18 @@ void graph_test()
   bfs(adj, 0);
   bfs(adj, 3);
   
+  fclose(fp);
+
+  if ((fp = fopen(data_file_1, "r")) == NULL) {
+    printf("Unable to open file %s\n", data_file_1);
+    return;
+  }
+
+  while (!feof(fp)) {
+    if (fscanf(fp, "%d, %d, %d", &x, &y, &weight) == 3) {
+      adj_list_add_vertex(adj_list, x, y, weight);
+    }
+  }
+  adj_list_print(adj_list);
   fclose(fp);
 }

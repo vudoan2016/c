@@ -16,7 +16,12 @@ static void swap(int *x, int *y)
 void heap_init(heap_t *h)
 {
   h->last = 1; /* first element will be stored at index 1 */
-  h->data = calloc(1, HEAP_MAX*sizeof(int));
+  h->data = calloc(1, HEAP_MAX*sizeof(heap_data_t));
+}
+
+bool heap_is_empty(heap_t *h)
+{
+  return (h->last > 1);
 }
 
 void heap_destroy(heap_t *h)
@@ -24,12 +29,18 @@ void heap_destroy(heap_t *h)
   free(h->data);
 }
 
-bool heap_insert(heap_t *h, int elem)
+bool heap_compare(heap_data_t *x, heap_data_t *y)
+{
+  return (x->key < y->key);
+}
+
+bool heap_insert(heap_t *h, heap_data_t *elem)
 {
   bool result = false;
   int parent, cur;
   
   if (h->last < HEAP_MAX) {
+    memcpy(&h->data[h->last], elem, sizeof(heap_data_t));
     h->data[h->last] = elem;
     cur = h->last;
     parent = h->last/2;

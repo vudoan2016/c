@@ -76,7 +76,7 @@ static void iter_permute(char *str)
  */
 bool verify()
 {
-
+  return true;
 }
 
 void permutation_test()
