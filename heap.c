@@ -4,13 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "heap.h"
 
-static void swap(int *x, int *y)
+static void swap(heap_data_t *x, heap_data_t *y)
 {
-  int tmp = *x;
-  *x = *y;
-  *y = tmp;
+  heap_data_t tmp;
+  memcpy(&tmp, x, sizeof(heap_data_t));
+  memcpy(x, y, sizeof(heap_data_t));
+  memcpy(y, &tmp, sizeof(heap_data_t));
 }
 
 void heap_init(heap_t *h)
@@ -21,7 +23,7 @@ void heap_init(heap_t *h)
 
 bool heap_is_empty(heap_t *h)
 {
-  return (h->last > 1);
+  return (h->last == 1);
 }
 
 void heap_destroy(heap_t *h)
@@ -29,9 +31,9 @@ void heap_destroy(heap_t *h)
   free(h->data);
 }
 
-bool heap_compare(heap_data_t *x, heap_data_t *y)
+static inline int heap_key_compare(heap_data_t *x, heap_data_t *y)
 {
-  return (x->key < y->key);
+  return (x->key - y->key);
 }
 
 bool heap_insert(heap_t *h, heap_data_t *elem)
@@ -41,10 +43,10 @@ bool heap_insert(heap_t *h, heap_data_t *elem)
   
   if (h->last < HEAP_MAX) {
     memcpy(&h->data[h->last], elem, sizeof(heap_data_t));
-    h->data[h->last] = elem;
     cur = h->last;
     parent = h->last/2;
-    while (cur > 1 && h->data[cur] < h->data[parent]) {
+    while (cur > 1 &&
+	   (heap_key_compare(&h->data[cur], &h->data[parent]) < 0)) {
       swap(&h->data[cur], &h->data[parent]);
       cur = parent;
       parent = cur/2;
@@ -60,12 +62,15 @@ bool heap_insert(heap_t *h, heap_data_t *elem)
  * Swap the last element with the first (index 1) then percolate 
  * the first element down.
  */
-int heap_delete(heap_t *h)
+heap_data_t *heap_delete(heap_t *h)
 {
   int cur, left_child, right_child;
-  int min = h->data[1];
+  heap_data_t *min;
+  
+  min = calloc(1, sizeof(heap_data_t));
+  memcpy(min, &h->data[1], sizeof(heap_data_t));
 
-  h->data[1] = h->data[--h->last];
+  memcpy(&h->data[1], &h->data[--h->last], sizeof(heap_data_t));
 
   cur = 1;
   left_child = 2*cur;
@@ -75,11 +80,12 @@ int heap_delete(heap_t *h)
     if (left_child < h->last) {
       cur = left_child;
     }
-    if (right_child < h->last && h->data[cur] > h->data[right_child]) {
+    if (right_child < h->last &&
+	(heap_key_compare(&h->data[cur], &h->data[right_child]) > 0)) {
       cur = right_child;
     }
 
-    if (h->data[cur] > h->data[cur/2]) {
+    if (heap_key_compare(&h->data[cur], &h->data[cur/2]) > 1) {
       break;
     }
     swap(&h->data[cur], &h->data[cur/2]);
@@ -94,9 +100,9 @@ void heap_print(heap_t *h)
 {
   int i;
   
-  printf("Last:%d, ", h->last);
+  printf("Last:%d. ", h->last);
   for (i = 1; i < h->last; i++) {
-    printf("%d, ", h->data[i]);
+    printf("%d, ", h->data[i].key);
   }
   printf("\n");
 }
@@ -106,7 +112,7 @@ void heap_print(heap_t *h)
    char *data_file = "heap_data.txt";
    FILE *fp = fopen(data_file, "r");
    heap_t *h = NULL;
-   int elem;
+   heap_data_t elem, *elem_p;
    
    h = calloc(1, sizeof(heap_t));
    if (h == NULL) {
@@ -118,15 +124,16 @@ void heap_print(heap_t *h)
    
    if (fp) {
      while (!feof(fp)) {
-       if (fscanf(fp, "%d", &elem) == 1) {
-	 heap_insert(h, elem);
+       if (fscanf(fp, "%d", &elem.key) == 1) {
+	 heap_insert(h, &elem);
 	 heap_print(h);
        }
      }
 
      while (h->last > 1) {
-       elem = heap_delete(h);
-       printf("min %d\n", elem);
+       elem_p = heap_delete(h);
+       printf("min %d\n", elem_p->key);
+       free(elem_p);
        heap_print(h);
      }       
    }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "graph.h"
 #include "queue.h"
+#include "heap.h"
 
 static void add_vertex(vertex_t adj[][MAX_VERTICES], int x, int y)
 {
@@ -48,8 +49,10 @@ static void bfs(vertex_t adj[][MAX_VERTICES], int vertex)
 
 void find_shortest_path(adj_list_vertex_t *adj[MAX_VERTICES], int source)
 {
-  int i;
+  int i, new_dist;
   heap_t *h;
+  heap_data_t data, *data_p;
+  adj_list_vertex_t *neighbor;
   
   for (i = 0; i < MAX_VERTICES; i++) {
     if (adj[i]) {
@@ -64,27 +67,45 @@ void find_shortest_path(adj_list_vertex_t *adj[MAX_VERTICES], int source)
 
   h = calloc(1, sizeof(heap_t));
   heap_init(h);
-  heap_insert(h, source);
-
   adj[source]->dist = 0;
+  data.key = adj[source]->dist;
+  data.element = source;
+  heap_insert(h, &data);
+
   while (heap_is_empty(h) == false) {
-    v = heap_delete(h);
-    neighbor = adj[v]->neighbor;
+    data_p = heap_delete(h);
+    printf("min dist %d, vertex %d\n", data_p->key, data_p->element);
+    neighbor = adj[data_p->element]->neighbor;
     while (neighbor) {
-      new_dist = neighbor->dist + neighbor->weight;
+      new_dist = neighbor->dist == INFINITY ? INFINITY : neighbor->dist + neighbor->weight;
       if (new_dist < neighbor->dist) {
 	neighbor->dist = new_dist;
-	adj[neighbor->vertex]->predecessor = v;
+	adj[neighbor->vertex]->predecessor = data_p->element;
       }
       if (neighbor->visited == false) {
-	heap_insert(neighbor->vertex);
+	data.key = neighbor->dist;
+	data.element = neighbor->vertex;
+	heap_insert(h, &data);
       }
       neighbor = neighbor->neighbor;
     }
-    adj[v]->visited = true;
+    adj[data_p->element]->visited = true;
   }
   heap_destroy(h);
   free(h);
+}
+
+void print_shortest_path(adj_list_vertex_t *adj[MAX_VERTICES], int dest)
+{
+  int i = dest;
+  
+  printf("predecessor from destination %d: ", dest);
+
+  while (adj[i]->predecessor != adj[i]->vertex) {
+    printf("%d, ", adj[i]->predecessor);
+    i = adj[i]->predecessor;
+  }
+  printf("\n");
 }
 
 void adj_list_add_vertex(adj_list_vertex_t *adj[MAX_VERTICES], int vertex,
@@ -101,7 +122,7 @@ void adj_list_add_vertex(adj_list_vertex_t *adj[MAX_VERTICES], int vertex,
   neighbor_p->neighbor = adj[vertex]->neighbor;
   neighbor_p->vertex = neighbor;
   neighbor_p->weight = weight;
-  neighbor_p->predecessor = 0;
+  neighbor_p->predecessor = vertex;
   adj[vertex]->neighbor = neighbor_p;
 }
 
@@ -150,11 +171,12 @@ void graph_test()
     }
   }
 
+#if 0
   bfs(adj, 2);
   bfs(adj, 1);
   bfs(adj, 0);
   bfs(adj, 3);
-  
+#endif
   fclose(fp);
 
   if ((fp = fopen(data_file_1, "r")) == NULL) {
@@ -168,5 +190,9 @@ void graph_test()
     }
   }
   adj_list_print(adj_list);
+
+  find_shortest_path(adj_list, 1);
+  print_shortest_path(adj_list, 5);
+  
   fclose(fp);
 }
