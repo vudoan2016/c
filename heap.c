@@ -7,18 +7,18 @@
 #include <string.h>
 #include "heap.h"
 
-static void swap(heap_data_t *x, heap_data_t *y)
+static void swap(heap_node_t *x, heap_node_t *y)
 {
-  heap_data_t tmp;
-  memcpy(&tmp, x, sizeof(heap_data_t));
-  memcpy(x, y, sizeof(heap_data_t));
-  memcpy(y, &tmp, sizeof(heap_data_t));
+  heap_node_t tmp;
+  memcpy(&tmp, x, sizeof(heap_node_t));
+  memcpy(x, y, sizeof(heap_node_t));
+  memcpy(y, &tmp, sizeof(heap_node_t));
 }
 
 void heap_init(heap_t *h)
 {
   h->last = 1; /* first element will be stored at index 1 */
-  h->data = calloc(1, HEAP_MAX*sizeof(heap_data_t));
+  h->node = calloc(1, HEAP_MAX*sizeof(heap_node_t));
 }
 
 bool heap_is_empty(heap_t *h)
@@ -28,26 +28,26 @@ bool heap_is_empty(heap_t *h)
 
 void heap_destroy(heap_t *h)
 {
-  free(h->data);
+  free(h->node);
 }
 
-static inline int heap_key_compare(heap_data_t *x, heap_data_t *y)
+static inline int heap_key_compare(heap_node_t *x, heap_node_t *y)
 {
   return (x->key - y->key);
 }
 
-bool heap_insert(heap_t *h, heap_data_t *elem)
+bool heap_insert(heap_t *h, heap_node_t *elem)
 {
   bool result = false;
   int parent, cur;
   
   if (h->last < HEAP_MAX) {
-    memcpy(&h->data[h->last], elem, sizeof(heap_data_t));
+    memcpy(&h->node[h->last], elem, sizeof(heap_node_t));
     cur = h->last;
     parent = h->last/2;
     while (cur > 1 &&
-	   (heap_key_compare(&h->data[cur], &h->data[parent]) < 0)) {
-      swap(&h->data[cur], &h->data[parent]);
+	   (heap_key_compare(&h->node[cur], &h->node[parent]) < 0)) {
+      swap(&h->node[cur], &h->node[parent]);
       cur = parent;
       parent = cur/2;
     }
@@ -62,15 +62,15 @@ bool heap_insert(heap_t *h, heap_data_t *elem)
  * Swap the last element with the first (index 1) then percolate 
  * the first element down.
  */
-heap_data_t *heap_delete(heap_t *h)
+heap_node_t *heap_delete(heap_t *h)
 {
   int cur, left_child, right_child;
-  heap_data_t *min;
+  heap_node_t *min;
   
-  min = calloc(1, sizeof(heap_data_t));
-  memcpy(min, &h->data[1], sizeof(heap_data_t));
+  min = calloc(1, sizeof(heap_node_t));
+  memcpy(min, &h->node[1], sizeof(heap_node_t));
 
-  memcpy(&h->data[1], &h->data[--h->last], sizeof(heap_data_t));
+  memcpy(&h->node[1], &h->node[--h->last], sizeof(heap_node_t));
 
   cur = 1;
   left_child = 2*cur;
@@ -81,14 +81,14 @@ heap_data_t *heap_delete(heap_t *h)
       cur = left_child;
     }
     if (right_child < h->last &&
-	(heap_key_compare(&h->data[cur], &h->data[right_child]) > 0)) {
+	(heap_key_compare(&h->node[cur], &h->node[right_child]) > 0)) {
       cur = right_child;
     }
 
-    if (heap_key_compare(&h->data[cur], &h->data[cur/2]) > 1) {
+    if (heap_key_compare(&h->node[cur], &h->node[cur/2]) > 1) {
       break;
     }
-    swap(&h->data[cur], &h->data[cur/2]);
+    swap(&h->node[cur], &h->node[cur/2]);
     left_child = 2*cur;
     right_child = 2*cur+1;
   }
@@ -102,17 +102,17 @@ void heap_print(heap_t *h)
   
   printf("Last:%d. ", h->last);
   for (i = 1; i < h->last; i++) {
-    printf("%d, ", h->data[i].key);
+    printf("%d, ", h->node[i].key);
   }
   printf("\n");
 }
  
  void heap_test()
  {
-   char *data_file = "heap_data.txt";
-   FILE *fp = fopen(data_file, "r");
+   char *node_file = "heap_node.txt";
+   FILE *fp = fopen(node_file, "r");
    heap_t *h = NULL;
-   heap_data_t elem, *elem_p;
+   heap_node_t elem, *elem_p;
    
    h = calloc(1, sizeof(heap_t));
    if (h == NULL) {
