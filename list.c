@@ -33,8 +33,10 @@ void print_list(node_t *head)
   node_t *cur = head;
   
   while (cur) {
-    printf("%d, ", cur->data);
+    printf("%d", cur->data);
     cur = cur->next;
+    if (cur)
+      printf(", ");
   }
 
   printf("\n");
@@ -42,7 +44,18 @@ void print_list(node_t *head)
 
 void remove_duplicate(node_t *head)
 {
-
+  node_t *cur = head, *next = NULL;
+  while (cur && cur->next) {
+    next = cur->next;
+    if (cur->data == next->data) {
+      cur->next = next->next;
+      free(next);
+      next = cur->next;
+    } else {
+      cur = next;
+      next = cur->next;
+    }
+  }
 }
 
 bool merged(node_t *head1, node_t *head2)
@@ -116,8 +129,12 @@ void list_test()
     }
   }
 
-  
   print_list(head1);
+
+  printf("After removing duplicate: ");
+  remove_duplicate(head1);
+  print_list(head1);
+  
   printf("list is printed in reversed order:\n");
   print_reverse(head1);
   printf("\n");

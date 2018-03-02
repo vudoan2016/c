@@ -143,7 +143,7 @@ static void adj_list_print(adj_list_t *adj[MAX_VERTICES])
       printf("Vertex: %d, neighbors at ", adj[i]->vertex);
       neighbor = adj[i]->neighbor;
       while (neighbor) {
-	printf("(vertex %d, weight %d), ", neighbor->vertex, neighbor->weight);
+	printf("(v:%d, w:%d), ", neighbor->vertex, neighbor->weight);
 	neighbor = neighbor->next;
       }
       printf("\n");

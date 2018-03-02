@@ -2,7 +2,8 @@
 #define __TREE_H__
 
 typedef struct node_s {
-  int data;
+  int key;
+  int height;
   struct node_s *left;
   struct node_s *right;
 } node_t;
