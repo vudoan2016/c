@@ -59,8 +59,8 @@ static void tree_delete(node_t **root, int key)
   if (x) {
     if (x->left == NULL ||  x->right == NULL) {
       if (parent == NULL) {
-	*root = NULL;
-	printf("key %d is the only node and it's at the root\n", key);
+	*root = x->left ? x->left : x->right;
+	printf("key %d is at the root node\n", key);
       } else if (x == parent->left) {
 	parent->left = x->left ? x->left : x->right;
 	if (parent->left) {
@@ -86,7 +86,11 @@ static void tree_delete(node_t **root, int key)
 	y = y->right;
       }
       printf("the eldest child is %d\n", y->key);
-      parent->right = y->left;
+      if (y == parent->right) {
+	parent->right = y->left;
+      } else {
+	parent->left = y->left;
+      }
       x->key = y->key;
       free(y);
     }
@@ -118,11 +122,21 @@ bool tree_search(node_t *root, int key)
   return (n != NULL);
 }
 
+void tree_longest_path(node_t *root)
+{
+
+}
+
+void tree_print_by_level(node_t *root)
+{
+
+}
+
 void tree_test()
 {
   char *tree_data = "tree_data.txt";
   FILE *fp;
-  node_t *root = NULL;
+  node_t *root = NULL, *x;
   int key;
   
   if ((fp = fopen(tree_data, "r")) == NULL) {
@@ -136,17 +150,22 @@ void tree_test()
     }
   }
 
+  printf("Tree: ");
   tree_print(root);
   printf("\n");
 
   /* delete */
-  key = -1;
-  tree_delete(&root, key);
+  while (x = root) {
+    printf("Deleting key %d:\n", x->key);
+    tree_delete(&root, x->key);
+  }
+  printf("Tree: ");
   tree_print(root);
+  printf("\n");
   
-  /* Search */
+  /* search */
   key = 20;
-  printf("%d is %s\n", key,
+  printf("Searching: %d is %s\n", key,
 	 tree_search(root, key) == true ? "found" : "not found");
   fclose(fp);
 }
