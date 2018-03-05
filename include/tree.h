@@ -8,4 +8,7 @@ typedef struct node_s {
   struct node_s *right;
 } node_t;
 
+void tree_print(node_t *root);
+node_t *avl_insert(node_t *root, int key);
+
 #endif

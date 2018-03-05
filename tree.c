@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "tree.h"
+#include "include/tree.h"
+#include "include/debug.h"
 
 static void tree_init(node_t *root)
 {
@@ -108,7 +109,7 @@ void tree_print(node_t *root)
     return;
   }
   tree_print(root->left);
-  printf("%d ", root->key);
+  printf("(%d,%d) ", root->key, root->height);
   tree_print(root->right);
 }
 
@@ -146,7 +147,8 @@ void tree_test()
 
   while (!feof(fp)) {
     if (fscanf(fp, "%d", &key) == 1) {
-      tree_insert(&root, key);
+      /*tree_insert(&root, key);*/
+      root = avl_insert(root, key);
     }
   }
 
@@ -155,6 +157,7 @@ void tree_test()
   printf("\n");
 
   /* delete */
+#if 0
   while (x = root) {
     printf("Deleting key %d:\n", x->key);
     tree_delete(&root, x->key);
@@ -162,6 +165,7 @@ void tree_test()
   printf("Tree: ");
   tree_print(root);
   printf("\n");
+#endif
   
   /* search */
   key = 20;
