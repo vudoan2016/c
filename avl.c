@@ -20,6 +20,9 @@ static int avl_get_height(node_t *root)
   return root ? root->height : 0;
 }
 
+/*
+ * https://www.geeksforgeeks.org/avl-tree-set-1-insertion/
+ */
 node_t *avl_insert(node_t *root, int key)
 {
   node_t *new, *x, *y;
