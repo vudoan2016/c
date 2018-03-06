@@ -148,6 +148,7 @@ void tree_test()
   while (!feof(fp)) {
     if (fscanf(fp, "%d", &key) == 1) {
       /*tree_insert(&root, key);*/
+      DBG("insert key %d\n", key);
       root = avl_insert(root, key);
     }
   }
