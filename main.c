@@ -3,9 +3,9 @@
 int main()
 {
 
-  tree_test();
-#if 0
   misc();
+#if 0
+  tree_test();
   list_test();
   graph_test();
   permutation_test();
