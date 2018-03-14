@@ -56,7 +56,7 @@ void string_compress(char *str)
     } else {
       if (count) {
 	y++;
-	*y = count + 48;
+	*y = count + 49;
       }
       y++;
       if (y != x) {
@@ -68,7 +68,9 @@ void string_compress(char *str)
   }
   if (count) {
     y++;
-    *y = count+48;
+    *y = count+49;
+    y++;
+    *y = '\0';
   }
   DBG("str: %s\n", str);
 }
