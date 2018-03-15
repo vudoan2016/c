@@ -35,42 +35,45 @@ void find_missing(int a[][COL_MAX])
 }
 
 /*
- * Implement Rabin-Karp algorithm
+ * Implement Rabin-Karp rolling hash algorithm.
  */
 void string_search(char *str, char *pattern)
 {
 
 }
 
+/*
+ * Replace duplicate characters by a number. For example, "abbbcccc" is 
+ * represented as "ab3c4."
+ */
 void string_compress(char *str)
 {
-  int count = 0;
-  char *x, *y = str;
+  int dup = 0;
+  char *c;
+  char *base = str;
 
-  x = y+1;
-  while (x && *x != '\0') {
-    DBG("x: %c, y: %c\n", *x, *y);
-    if (*y == *x) {
-      count++;
-      DBG("count: %d\n", count);
+  c = base+1;
+  while (c && *c != '\0') {
+    DBG("c: %c, base: %c\n", *c, *base);
+    if (*base == *c) {
+      dup++;
+      DBG("count: %d\n", dup);
     } else {
-      if (count) {
-	y++;
-	*y = count + 49;
+      if (dup) {
+	*++base = (dup + 48) + 1; // add 1 is for the base
       }
-      y++;
-      if (y != x) {
-	*y = *x;
+      base++;
+      if (base != c) {
+	// start a new sequence
+	*base = *c;
       }
-      count = 0;
+      dup = 0;
     }
-    x++;
+    c++;
   }
-  if (count) {
-    y++;
-    *y = count+49;
-    y++;
-    *y = '\0';
+  if (dup) {
+    *++base = (dup+48) + 1; // add 1 is for the base
+    *++base = '\0';
   }
   DBG("str: %s\n", str);
 }
@@ -85,5 +88,7 @@ void misc()
   char str[] = "abbbbccccccc";
 
   find_missing(a);
+  printf("String %s ", str);
   string_compress(str);
+  printf("in compressed form %s.\n", str);
 }
