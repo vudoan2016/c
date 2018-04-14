@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <math.h>
 #include "include/debug.h"
 
 #define ROW_MAX 5
@@ -35,11 +38,56 @@ void find_missing(int a[][COL_MAX])
 }
 
 /*
- * Implement Rabin-Karp rolling hash algorithm.
+ * Implement Rabin-Karp rolling hash algorithm. H = c1*a^k-1 + c2*a^k-2 + 
+ * c3*a^k-3 ... where c is a character in the input str (c1c2c3...cn) and a 
+ * is a constant and k is the length of the pattern.
+ * https://brilliant.org/wiki/rabin-karp-algorithm/
+ *
+ * Output: the number of matches
  */
-void string_search(char *str, char *pattern)
+int grep(char *pattern, char *str)
 {
+  int k = strlen(pattern);
+  int base = 256;
+  int h = 0, i, pattern_h = 0, matches = 0;
+  char *c;
+  
+  if (k > strlen(str)) {
+    return 0;
+  }
+  
+  for (i = 0; i < k; i++) {
+    pattern_h += *(pattern+i)*pow(base, k-i-1);
+    DBG("i: %d, c: %c (%d), pattern_h: %d", i, pattern[i], pattern[i], pattern_h);
+  }
+      
+  c = str;
+  for (i = 0; i < k; i++) {
+    h += *c * pow(base, k-i-1);
+    DBG("i: %d, c: %c (%d), h: %d", i, *c, *c, h);
+    c++;
+  }
 
+  i = 0;
+  if (h == pattern_h) {
+    matches++;
+    DBG("found a match. key %d", h);
+  }
+  
+  while (c && *c != '\0') {
+    h -= str[i] * pow(base, k-1);
+    h *= base;
+    h += *c;
+    DBG("c: %c (%d), h: %d", *c, *c, h);
+    if (h == pattern_h) {
+      matches++;
+      DBG("found a match. key %d", h);
+    }
+      
+    c++;
+    i++;
+  }
+  return matches;
 }
 
 /*
@@ -78,6 +126,18 @@ void string_compress(char *str)
   DBG("str: %s\n", str);
 }
 
+void endianess()
+{
+  int x = 0x12345678;
+  char *c = (char *)&x;
+
+  if (*c == 0x12) {
+    printf("big endian machine\n");
+  } else {
+    printf("little endian machine\n");
+  }
+}
+
 void misc()
 {
   int a[ROW_MAX][COL_MAX] = {{4, 5, 6, 7, 8, 10},
@@ -85,10 +145,30 @@ void misc()
 			     {4, 5, 6, 8, 9, 10},
 			     {4, 5, 6, 7, 9, 10},
 			     {101, 102, 103, 104, 105, 107}};
-  char str[] = "abbbbccccccc";
+  char str[] = "abbbbccccbbc", pattern[] = "bbc";
+  char file[] = "misc.c";
+  FILE *fp = NULL;
+  char buf[4*1024] = "";
 
   find_missing(a);
-  printf("String %s ", str);
-  string_compress(str);
-  printf("in compressed form %s.\n", str);
+  DBG("String %s ", str);
+  //string_compress(str);
+  //printf("in compressed form %s.\n", str);
+
+  //endianess();
+  if ((fp = fopen(file, "r")) == NULL) {
+    printf("Unable to open file %s\n", file);
+    return;
+  }
+
+  while (!feof(fp)) {
+    fgets(buf, 1024, fp);
+    printf("%s", buf);
+  }
+  printf("file %s:\n", file);
+  printf("%s", buf);
+
+  printf("found %d matche(s) of %s in %s\n", grep(pattern, str),
+	 pattern, str);
+  fclose(fp);
 }
