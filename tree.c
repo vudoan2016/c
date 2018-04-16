@@ -4,6 +4,8 @@
 #include "include/tree.h"
 #include "include/debug.h"
 
+#define DEBUG 1
+
 static void tree_init(node_t *root)
 {
   root->left = NULL;
@@ -15,7 +17,7 @@ static void tree_init(node_t *root)
  */
 static void tree_insert(node_t **root, int key)
 {
-  node_t *node_p, *parent_p = NULL, *new_p = calloc(1, sizeof(node_t));
+  node_t *node_p, *parent_p = NULL, *new_p = (node_t *)calloc(1, sizeof(node_t));
   bool duplicate = false;
   
   new_p->key = key;
@@ -61,20 +63,20 @@ static void tree_delete(node_t **root, int key)
     if (x->left == NULL ||  x->right == NULL) {
       if (parent == NULL) {
 	*root = x->left ? x->left : x->right;
-	printf("key %d is at the root node\n", key);
+	DBG("key %d is at the root node", key);
       } else if (x == parent->left) {
 	parent->left = x->left ? x->left : x->right;
 	if (parent->left) {
-	  printf("key %d is at a node which has no children\n", key);
+	  DBG("key %d is at a node which has no children", key);
 	} else {
-	  printf("key %d is at a leaf node\n", key);
+	  DBG("key %d is at a leaf node", key);
 	}
       } else {
 	parent->right = x->left ? x->left : x->right;
 	if (parent->right) {
-	  printf("key %d is at a node which has no children\n", key);
+	  DBG("key %d is at a node which has no children", key);
 	} else {
-	  printf("key %d is at a leaf node\n", key);
+	  DBG("key %d is at a leaf node", key);
 	}
       }
       free(x);
@@ -86,7 +88,7 @@ static void tree_delete(node_t **root, int key)
 	parent = y;
 	y = y->right;
       }
-      printf("the eldest child is %d\n", y->key);
+      DBG("the eldest child is %d", y->key);
       if (y == parent->right) {
 	parent->right = y->left;
       } else {
@@ -96,7 +98,7 @@ static void tree_delete(node_t **root, int key)
       free(y);
     }
   } else {
-    printf("key %d is not found in tree\n", key);
+    DBG("key %d is not found in tree", key);
   }
 }
 
@@ -135,7 +137,7 @@ void tree_print_by_level(node_t *root)
 
 void tree_test()
 {
-  char *tree_data = "tree_data.txt";
+  char tree_data[] = "tree_data.txt";
   FILE *fp;
   node_t *root = NULL, *x;
   int key;
@@ -148,15 +150,14 @@ void tree_test()
   while (!feof(fp)) {
     if (fscanf(fp, "%d", &key) == 1) {
       /*tree_insert(&root, key);*/
-      DBG("insert key %d\n", key);
       root = avl_insert(root, key);
     }
   }
-
+#if 1
   printf("Tree: ");
   tree_print(root);
   printf("\n");
-
+#endif
   /* delete */
 #if 0
   while (x = root) {
