@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <math.h>
 #include "include/debug.h"
+#include "include/utils.h"
 
-#define ROW_MAX 5
+#define ROW_MAX 6
 #define COL_MAX 6
 
 #define DEBUG 1
@@ -12,19 +14,21 @@
 /* Given a 2D array which has a missing number in each row. The numbers in
  * each row are sorted and incremental by 1. Find the number using binary search.
  */
-void find_missing(int a[][COL_MAX])
+static void find_missing(int a[ROW_MAX][COL_MAX])
 {
-  int start, middle, end, i;
+  int start, middle, end, i, j;
+  bool found = false;
   
   for (i = 0; i < ROW_MAX; i++) {
     start = 0;
-    end = ROW_MAX;
-    while (start <= end) {
-      middle = (start + end)/2;
-
-      /* Check if middle is the missing number */
-      if (middle > start && a[i][middle] != a[i][middle-1]+1) {
-	break;
+    end = COL_MAX-1;
+    middle = (start + end)/2;
+    
+    /* binary search for the missing number in each row */
+    while (start <= middle && !found) {
+      if (a[i][middle] != a[i][middle-1]+1) {
+	/* middle is the missing number */
+	found = true;
       } else if (a[i][middle] > a[i][0] + middle) {
 	/* The missing number is on the left of middle */
 	end = middle-1;
@@ -32,8 +36,27 @@ void find_missing(int a[][COL_MAX])
 	/* The missing number is on the right of middle */
 	start = middle+1;
       }
+      middle = (start + end)/2;
     }
-    printf("%d: missing number %d\n", i, a[i][0] + middle);
+
+    /* The below printing (O(n)) defeats the purpose of the binary search (O(logn)).
+     * The above logic should be in seperate function where it can be called
+     * multiple times. 
+     */
+    printf("[");
+    for (j = 0; j < COL_MAX; j++) {
+      printf("%d", a[i][j]);
+      if (j < COL_MAX-1) {
+	printf(", ");
+      }
+    }
+    printf("]: ");
+    if (found) {
+      printf("missing number %d\n", a[i][0] + middle);
+    } else {
+      printf("no missing number\n");
+    }
+    found = false;
   }
 }
 
@@ -49,10 +72,10 @@ void find_missing(int a[][COL_MAX])
  *
  * Output: the number of matches
  */
-int grep(char *pattern, char *str)
+int grep(char *pattern, char str[])
 {
-  int k = strlen(pattern);
-  int base = 64, i, matches = 0;
+  unsigned int i, k = strlen(pattern);
+  int base = 64, matches = 0;
   unsigned int h = 0, pattern_h = 0;
   char *c;
   
@@ -98,7 +121,7 @@ int grep(char *pattern, char *str)
  * Replace duplicate characters by a number. For example, "abbbcccc" is 
  * represented as "ab3c4."
  */
-void string_compress(char *str)
+static void string_compress(char *str)
 {
   int dup = 0;
   char *c;
@@ -130,7 +153,7 @@ void string_compress(char *str)
   DBG("str: %s\n", str);
 }
 
-void endianess()
+static void endianess()
 {
   int x = 0x12345678;
   char *c = (char *)&x;
@@ -142,37 +165,73 @@ void endianess()
   }
 }
 
+static void find_duplicates(unsigned int a[], int size)
+{
+  int i;
+  unsigned int *ba;
+
+  ba = (unsigned int*)calloc(1, sizeof(unsigned int)*BA_MAX);
+  
+  printf("Duplicates in: ");
+  for (i = 0; i < size; i++) {
+    printf("%d", a[i]);
+    if (i < size-1) {
+      printf(", ");
+    }
+  }
+  printf(": ");
+
+  for (i = 0; i < size; i++) {
+    if (ba_search(ba, a[i])) {
+      printf("%d, ", a[i]);
+    } else {
+      ba_insert(ba, a[i]);
+    }
+  }
+  printf("\n");
+  free(ba);
+}
+
 void misc()
 {
   int a[ROW_MAX][COL_MAX] = {{4, 5, 6, 7, 8, 10},
 			     {4, 5, 7, 8, 9, 10},
 			     {4, 5, 6, 8, 9, 10},
 			     {4, 5, 6, 7, 9, 10},
-			     {101, 102, 103, 104, 105, 107}};
-  char str[] = "abbbbccccbbc", pattern[] = "bbccc";
+			     {101, 102, 103, 104, 105, 107},
+			     {11, 12, 13, 14, 15, 16}};
+  unsigned int b[] = {10001, 10001, 5, 6, 9, 6, 1, 20001, 9, 20001};
+  char str[] = "abbbbccccbbc", pattern[] = "void";
   char file[] = "misc.c";
   FILE *fp = NULL;
   char buf[4*1024] = "";
-
+  int matches = 0;
+  
+  /* find missing numbers in a 2D array */
   find_missing(a);
-  DBG("String %s ", str);
-  //string_compress(str);
-  //printf("in compressed form %s.\n", str);
 
-  //endianess();
+  /* find duplicated unsigned int using bit array */
+  find_duplicates(b, 10);
+  
+  /* compress a string */
+  DBG("String %s ", str);
+  string_compress(str);
+  printf("in compressed form %s.\n", str);
+
   if ((fp = fopen(file, "r")) == NULL) {
     printf("Unable to open file %s\n", file);
     return;
   }
-
+  
   while (!feof(fp)) {
     fgets(buf, 1024, fp);
-    printf("%s", buf);
+    DBG("%s", buf);
+    matches += grep(pattern, buf);
   }
-  printf("file %s:\n", file);
-  printf("%s", buf);
-
-  printf("found %d matche(s) of %s in %s\n", grep(pattern, str),
-	 pattern, str);
   fclose(fp);
+  
+  printf("found %d match(es) of \'%s\' in file %s\n", matches, pattern, file);
+
+  /* test system's endianess */
+  endianess();
 }

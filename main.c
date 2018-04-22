@@ -3,13 +3,13 @@
 int main()
 {
 
-  tree_test();
+  misc();
 #if 0
   list_test();
   graph_test();
   permutation_test();
   heap_test();
-  misc();
+  tree_test();
 #endif
   
   return 0;
