@@ -130,16 +130,37 @@ void tree_longest_path(node_t *root)
 
 }
 
-void tree_print_by_level(node_t *root)
+/* 
+ * Use BFS 
+ */
+void tree_in_level_traverse(node_t *root)
 {
+}
 
+/*
+ * Test if a tree is a BST 
+ */
+bool tree_is_bst(node_t *root)
+{
+  node_t *node = root, *parent = NULL;
+  
+  if (root == NULL) {
+    return true;
+  } else if ((root->left && root->key < root->left->key) ||
+	     (root->right && root->key > root->right->key)) {
+    DBG("key %d, left %d, right %d", root->key, root->left ? root->left->key : -2,
+	root->right ? root->right->key : -1);
+    return false;
+  } else {
+    return (tree_is_bst(root->left) && tree_is_bst(root->right));
+  }
 }
 
 void tree_test()
 {
   char tree_data[] = "tree_data.txt";
   FILE *fp;
-  node_t *root = NULL, *x;
+  node_t *root = NULL;
   int key;
   
   if ((fp = fopen(tree_data, "r")) == NULL) {
@@ -174,5 +195,8 @@ void tree_test()
   printf("Searching: %d is %s\n", key,
 	 tree_search(root, key) == true ? "found" : "not found");
   fclose(fp);
-}
+
+  /* test if tree is bst */
+  printf("Tree is %s\n", tree_is_bst(root) ? "bst" : "not bst");
+ }
 

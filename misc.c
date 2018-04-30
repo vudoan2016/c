@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <math.h>
 #include "include/debug.h"
 #include "include/utils.h"
 
@@ -60,99 +59,6 @@ static void find_missing(int a[ROW_MAX][COL_MAX])
   }
 }
 
-/*
- * Implement Rabin-Karp rolling hash algorithm. H = c1*a^k-1 + c2*a^k-2 + 
- * c3*a^k-3 ... where c is a character in the input str (c1c2c3...cn) and a 
- * is a constant and k is the length of the pattern. Essentially it means
- * that each character occupies 1 byte (if the base is 256). 
- * There is a problem with this algorithm. If the base is 256 then the pattern 
- * can only have 4 characters. Longer patterns will result in hash collision.
- * Text character starts with the 'space' (32) and ends with '~' (126).
- * https://brilliant.org/wiki/rabin-karp-algorithm/
- *
- * Output: the number of matches
- */
-int grep(char *pattern, char str[])
-{
-  unsigned int i, k = strlen(pattern);
-  int base = 64, matches = 0;
-  unsigned int h = 0, pattern_h = 0;
-  char *c;
-  
-  if (k > strlen(str)) {
-    return 0;
-  }
-  
-  for (i = 0; i < k; i++) {
-    pattern_h += (pattern[i]-31)*pow(base, k-i-1);
-    DBG("i: %d, c: %c (%d), pattern_h: %d", i, pattern[i], pattern[i], pattern_h);
-  }
-      
-  c = str;
-  for (i = 0; i < k; i++) {
-    h += (*c-31) * pow(base, k-i-1);
-    DBG("i: %d, c: %c (%d), h: %d", i, *c, *c, h);
-    c++;
-  }
-
-  i = 0;
-  if (h == pattern_h) {
-    matches++;
-    DBG("found a match. key %d", h);
-  }
-  
-  while (c && *c != '\0') {
-    h -= (str[i]-31) * pow(base, k-1);
-    h *= base;
-    h += *c-31;
-    DBG("c: %c (%d), h: %d", *c, *c, h);
-    if (h == pattern_h) {
-      matches++;
-      DBG("found a match. key %d", h);
-    }
-      
-    c++;
-    i++;
-  }
-  return matches;
-}
-
-/*
- * Replace duplicate characters by a number. For example, "abbbcccc" is 
- * represented as "ab3c4."
- */
-static void string_compress(char *str)
-{
-  int dup = 0;
-  char *c;
-  char *base = str;
-
-  c = base+1;
-  while (c && *c != '\0') {
-    DBG("c: %c, base: %c\n", *c, *base);
-    if (*base == *c) {
-      dup++;
-      DBG("count: %d\n", dup);
-    } else {
-      if (dup) {
-	*++base = (dup + 48) + 1; // add 1 is for the base
-      }
-      base++;
-      if (base != c) {
-	// start a new sequence
-	*base = *c;
-      }
-      dup = 0;
-    }
-    c++;
-  }
-  if (dup) {
-    *++base = (dup+48) + 1; // add 1 is for the base
-    *++base = '\0';
-  }
-  DBG("str: %s\n", str);
-}
-
 static void endianess()
 {
   int x = 0x12345678;
@@ -192,6 +98,62 @@ static void find_duplicates(unsigned int a[], int size)
   free(ba);
 }
 
+/*
+ * https://www.hackerrank.com/challenges/coin-change/problem
+ */
+int combo(int sum, int size, int *a)
+{
+  int i, ii, j, k, count = 0, remain;
+  int seq[size] = {0};
+
+  for (i = 0; i < size; i++) {
+    remain = sum - a[i];
+    DBG("i: %d, remain = %d", i, remain);
+    seq[i] = a[i];
+    if (remain == 0) {
+      count++;
+      printf("count = %d, {", count);
+      for (k = 0; k <= i; k++) {
+	printf("%d ", seq[k]);
+      }
+      printf("}\n");
+    }
+    for (ii = i+1; ii < size; ii++) {
+      remain -= a[ii];
+      seq[ii] = a[ii];
+      DBG("ii: %d, remain = %d", ii, remain);
+      if (remain == 0) {
+	count++;
+	printf("count = %d, {", count);
+	for (k = 0; k <= ii; k++) {
+	  printf("%d ", seq[k]);
+	}
+	printf("}\n");
+      }
+      for (j = ii+1; j < size && remain > a[j]; j++) {
+	seq[j] = a[j];
+	if (j < size-1) {
+	  remain -= a[j];
+	} else {
+	  remain -= remain % a[j];
+	}
+	DBG("j: %d, remain = %d", j, remain);
+	if (remain == 0) {
+	  count++;
+	  printf("count = %d, {", count);
+	  for (k = 0; k <= j; k++) {
+	    DBG("%d ", seq[k]);
+	  }
+	  printf("}\n");
+	}
+      }
+      remain = sum - a[i];
+    }
+  }
+
+  return count;
+}
+
 void misc()
 {
   int a[ROW_MAX][COL_MAX] = {{4, 5, 6, 7, 8, 10},
@@ -201,11 +163,8 @@ void misc()
 			     {101, 102, 103, 104, 105, 107},
 			     {11, 12, 13, 14, 15, 16}};
   unsigned int b[] = {10001, 10001, 5, 6, 9, 6, 1, 20001, 9, 20001};
-  char str[] = "abbbbccccbbc", pattern[] = "void";
-  char file[] = "misc.c";
-  FILE *fp = NULL;
-  char buf[4*1024] = "";
-  int matches = 0;
+  int sum = 4, size = 3, count, i;
+  int c[] = {1, 2, 3};
   
   /* find missing numbers in a 2D array */
   find_missing(a);
@@ -213,25 +172,9 @@ void misc()
   /* find duplicated unsigned int using bit array */
   find_duplicates(b, 10);
   
-  /* compress a string */
-  DBG("String %s ", str);
-  string_compress(str);
-  printf("in compressed form %s.\n", str);
-
-  if ((fp = fopen(file, "r")) == NULL) {
-    printf("Unable to open file %s\n", file);
-    return;
-  }
-  
-  while (!feof(fp)) {
-    fgets(buf, 1024, fp);
-    DBG("%s", buf);
-    matches += grep(pattern, buf);
-  }
-  fclose(fp);
-  
-  printf("found %d match(es) of \'%s\' in file %s\n", matches, pattern, file);
-
   /* test system's endianess */
   endianess();
+
+  combo(sum, size, c);
 }
+

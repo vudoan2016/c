@@ -123,5 +123,5 @@ node_t *avl_insert(node_t *root, int key)
 
 node_t *avl_delete()
 {
-
+  return NULL;
 }
