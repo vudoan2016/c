@@ -6,4 +6,9 @@ typedef struct node_s {
   struct node_s *next;
 } node_t;
 
+typedef struct list_s {
+  node_t *head;
+  node_t *tail;
+} list_t;
+
 #endif

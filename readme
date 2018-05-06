@@ -1,16 +1,16 @@
 Practicing C code
 gcc - o main -g -Wall main.c permute.c
 
+git init # create new repo locally
+git remote add origin https://github.com/vdoan2016/java.git
+
 git add main.c permutation.c
 git commit -m "Initial commit of string permutaion"
 git push origin master
 
 git remote -v
 git diff --name-only
+git status
 
 Allow core file to be generated "ulimit -c unlimited"
 
-TODO:
-1. find_duplicate() using bit array
-2. passing 2D array as argument
-3. Variable length array

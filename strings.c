@@ -32,13 +32,13 @@ int grep(char *pattern, char str[])
   
   for (i = 0; i < k; i++) {
     pattern_h += (pattern[i]-31)*pow(base, k-i-1);
-    DBG("i: %d, c: %c (%d), pattern_h: %d", i, pattern[i], pattern[i], pattern_h);
+    //DBG("i: %d, c: %c (%d), pattern_h: %d", i, pattern[i], pattern[i], pattern_h);
   }
       
   c = str;
   for (i = 0; i < k; i++) {
     h += (*c-31) * pow(base, k-i-1);
-    DBG("i: %d, c: %c (%d), h: %d", i, *c, *c, h);
+    //DBG("i: %d, c: %c (%d), h: %d", i, *c, *c, h);
     c++;
   }
 
@@ -52,7 +52,7 @@ int grep(char *pattern, char str[])
     h -= (str[i]-31) * pow(base, k-1);
     h *= base;
     h += *c-31;
-    DBG("c: %c (%d), h: %d", *c, *c, h);
+    //DBG("c: %c (%d), h: %d", *c, *c, h);
     if (h == pattern_h) {
       matches++;
       DBG("found a match. key %d", h);
@@ -65,42 +65,39 @@ int grep(char *pattern, char str[])
 }
 
 /*
- * Replace duplicate characters by a number. For example, "abbbcccc" is 
- * represented as "ab3c4."
+ * Replace duplicate letters by a number. For example, "abbbcccc" is 
+ * represented as "a1b3c4."
  */
 static void string_compress(char *str)
 {
   int dup = 0;
-  char *c;
-  char *base = str;
+  char *c = str;
+  char tmp[strlen(str)+1] = "";
+  int i = 0;
 
-  c = base+1;
-  while (c && *c != '\0') {
-    DBG("c: %c, base: %c\n", *c, *base);
-    if (*base == *c) {
+  while (*c != '\0') {
+    if (tmp[i] == *c) {
       dup++;
-      DBG("count: %d\n", dup);
     } else {
-      if (dup) {
-	*++base = (dup + 48) + 1; // add 1 is for the base
+      if (dup > 0) {
+	i += sprintf(&tmp[++i], "%d", dup);
+	tmp[i] = *c;
+	dup = 1;
+      } else {
+	tmp[i] = *c;
+	dup = 1;
       }
-      base++;
-      if (base != c) {
-	// start a new sequence
-	*base = *c;
-      }
-      dup = 0;
     }
     c++;
+    if (*c == '\0') {
+      i += sprintf(&tmp[++i], "%d", dup);
+      tmp[i] = '\0';
+    }
   }
-  if (dup) {
-    *++base = (dup+48) + 1; // add 1 is for the base
-    *++base = '\0';
-  }
-  DBG("str: %s\n", str);
+  strncpy(str, tmp, i+1);
 }
 
-/* Multiply 2 numbers given as strings */
+/* String multiplication. Need to support negative multiplicands */
 char *multiplication(char *x, char *y)
 {
   int i, j, k, z, carry, carry1, sum;
@@ -143,42 +140,44 @@ void string_test()
 {
   char x[LINE_MAX], y[LINE_MAX];
   char *prod = NULL;
-  char file[] = "misc.c";
+  char file[] = "string_ut.txt";
   FILE *fp = NULL;
   char buf[4*1024] = "";
-  char uncompressed[LINE_MAX];
-  char pattern[] = "void";
-  int matches = 0;
+  char pattern[] = "aaa";
+  int matches = 0, i, count = 5;
 
-  /* Test1: multiply 2 strings */
-  fgets(x, LINE_MAX, stdin);
-  x[strlen(x)-1] = '\0';
-  fgets(y, LINE_MAX, stdin);
-  y[strlen(y)-1] = '\0';
-  prod = multiplication(x, y);
-  printf("%s * %s = %s\n", x, y, prod);
-  free(prod);
-
-  /* Test2: compress a string */
-  printf("Enter a string to compress: ");
-  fgets(x, LINE_MAX, stdin);
-  x[strlen(x)-1] = '\0';
-  DBG("String %s ", x);
-  string_compress(x);
-  printf("in compressed form %s.\n", x);
-
-  /* Test3: implement grep */
   if ((fp = fopen(file, "r")) == NULL) {
     printf("Unable to open file %s\n", file);
     return;
   }
   
+  printf("1. String multiplication\n");
+  for (i = 0; i < count; i++) {
+    fgets(x, LINE_MAX, fp);
+    x[strlen(x)-1] = '\0';
+    fgets(y, LINE_MAX, fp);
+    y[strlen(y)-1] = '\0';
+    prod = multiplication(x, y);
+    printf("%s * %s = %s\n", x, y, prod);
+    free(prod);
+  }
+  printf("\n\n");
+  
+  printf("2. Compress a string\n");
+  fgets(x, LINE_MAX, fp);
+  /* get rid of EOL stored by fgets */
+  x[strlen(x)-1] = '\0';
+  printf("%s\n", x);
+  string_compress(x);
+  printf("%s\n", x);
+  printf("\n\n");
+
+  printf("3: grep '%s' %s\n", pattern, file);
   while (!feof(fp)) {
     fgets(buf, 1024, fp);
-    DBG("%s", buf);
     matches += grep(pattern, buf);
   }
+  printf("found %d match(es) of '%s' in file %s\n", matches, pattern, file);
+
   fclose(fp);
-  
-  printf("found %d match(es) of \'%s\' in file %s\n", matches, pattern, file);
 }

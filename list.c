@@ -4,14 +4,27 @@
 #include <string.h>
 #include "list.h"
 
-void list_insert(node_t **head, int data)
+void list_init(list_t **l)
 {
-  node_t *new = calloc(1, sizeof(int));
+  *l = (list_t *)calloc(1, sizeof(list_t));
+}
 
-  if (new) {
-    new->data = data;
-    new->next = *head;
-    *head = new;
+/* append to list */
+void list_insert(list_t *l, int data)
+{
+  node_t *p = (node_t *)calloc(1, sizeof(int));
+
+  if (p) {
+    p->data = data;
+    p->next = NULL;
+    if (l->head == NULL) 
+      l->head = p;
+    if (l->tail == NULL)
+      l->tail = p;
+    else {
+      l->tail->next = p;
+      l->tail = p;
+    }
   }
 }
 
@@ -44,16 +57,25 @@ void print_list(node_t *head)
 
 void remove_duplicate(node_t *head)
 {
-  node_t *cur = head, *next = NULL;
-  while (cur && cur->next) {
-    next = cur->next;
-    if (cur->data == next->data) {
-      cur->next = next->next;
-      free(next);
-      next = cur->next;
+  unsigned int *ba = (unsigned int *)calloc(1, 0x7ffffff * sizeof(unsigned int));
+  
+  node_t *cur = head, *prev = NULL, *tmp;
+  while (cur) {
+    if (ba[(unsigned int)(cur->data)>>5] & (1 << (unsigned int)(cur->data)%32)) {
+      tmp = cur;
+      cur = cur->next;
+      if (prev) {
+	prev->next = cur;
+      }
+      /* delete the node that head is pointing to so update head */
+      if (head == tmp) {
+	head = cur;
+      }
+      free(tmp);
     } else {
-      cur = next;
-      next = cur->next;
+      ba[(unsigned int)(cur->data)>>5] |= 1 << (unsigned int)(cur->data)%32;
+      prev = cur;
+      cur = cur->next;
     }
   }
 }
@@ -93,6 +115,28 @@ void list_merge(node_t *head1, node_t *head2, int position)
   }
 }
 
+node_t* list_remove(node_t *head, int x)
+{
+  node_t *prev = NULL, *cur = head, *tmp;
+  while (cur) {
+    if (cur->data == x) {
+      tmp = cur;
+      cur = cur->next;
+      if (prev) {
+	prev->next = cur;
+      }
+      /* delete the node that head is pointing to so update head */
+      if (head == tmp)
+	head = cur;
+      free(tmp);
+    } else {
+      prev = cur;
+      cur = cur->next;
+    }
+  }
+  return head;
+}
+
 void print_reverse(node_t *head)
 {
   if (head == NULL) {
@@ -105,11 +149,14 @@ void print_reverse(node_t *head)
 
 void list_test()
 {
-  char *data_file = "list_data.txt";
+  char data_file[] = "list_data.txt";
   FILE *fp;
   char input[512], *p, *token;
-  int data, position = 5;
-  node_t *head1 = NULL, *head2 = NULL;
+  int data, position = 5, x = 200;
+  list_t *l = NULL, *l1 = NULL;
+  
+  list_init(&l);
+  list_init(&l1);
   
   if ((fp = fopen(data_file, "r")) == NULL) {
     return;
@@ -118,33 +165,46 @@ void list_test()
   if (fgets(input, 512, fp) != NULL) {
     p = input;
     while (token = strtok_r(p, " ", &p)) {
-      list_insert(&head1, atoi(token));
+      list_insert(l, atoi(token));
     }
   }
 
   if (fgets(input, 512, fp) != NULL) {
     p = input;
     while (token = strtok_r(p, " ", &p)) {
-      list_insert(&head2, atoi(token));
+      list_insert(l1, atoi(token));
     }
   }
 
-  print_list(head1);
+  printf("1. Remove duplicates\n");
+  print_list(l->head);
+  remove_duplicate(l->head);
+  print_list(l->head);
+  printf("\n\n");
+  
+  printf("2. Print in reversed order\n");
+  print_reverse(l->head);
+  printf("\n\n");
+  
+  printf("3. List is reversed\n");
+  reverse(&l->head);
+  print_list(l->head);
+  printf("\n\n");
+  
+  printf("4. Remove %d from list\n", x);
+  print_list(l1->head);
+  l1->head = list_remove(l1->head, 200);
+  print_list(l1->head);
+  printf("\n\n");
 
-  printf("After removing duplicate: ");
-  remove_duplicate(head1);
-  print_list(head1);
-  
-  printf("list is printed in reversed order:\n");
-  print_reverse(head1);
-  printf("\n");
-  
-  reverse(&head1);
-  printf("list is reversed: ");
-  print_list(head1);
-  
-  list_merge(head1, head2, position);
+  printf("5. Merge 2 lists\n");
+  list_merge(l->head, l1->head, position);
+  print_list(l->head);
+  print_list(l1->head);
+  printf("\n\n");
 
-  printf("list1 and list2 are %s\n",
-	 merged(head1, head2) == true ? "merged" : "not merged");
+  printf("6. Are lists merged?\n");
+  printf("%s", merged(l->head, l1->head) == true ? "yes" : "no");
+  printf("\n\n");
+
 }

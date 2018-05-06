@@ -8,5 +8,6 @@ void tree_test();
 void list_test();
 void misc();
 void string_test();
+void sort_test();
 
 #endif

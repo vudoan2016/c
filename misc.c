@@ -65,9 +65,9 @@ static void endianess()
   char *c = (char *)&x;
 
   if (*c == 0x12) {
-    printf("big endian machine\n");
+    printf("big\n");
   } else {
-    printf("little endian machine\n");
+    printf("little\n");
   }
 }
 
@@ -88,13 +88,12 @@ static void find_duplicates(unsigned int a[], int size)
   printf(": ");
 
   for (i = 0; i < size; i++) {
-    if (ba_search(ba, a[i])) {
+    if (ba_lookup(ba, a[i])) {
       printf("%d, ", a[i]);
     } else {
       ba_insert(ba, a[i]);
     }
   }
-  printf("\n");
   free(ba);
 }
 
@@ -154,8 +153,30 @@ int combo(int sum, int size, int *a)
   return count;
 }
 
+/* Sum of "month" contiguous squares = "day" */
+int birthday_cake(unsigned int a[], int size, int month, int day)
+{
+  int i, matches = 0, sum = 0;
+
+  for (i = 0; i < month; i++) {
+    sum += a[i];
+    matches++;
+  }
+  for (i = 1; i < size; i++) {
+    sum -= a[i-1];
+    sum += a[i+month-1];
+    if (sum == day) {
+      matches++;
+    }
+  }
+  return matches;
+}
+
 void misc()
 {
+  char file_name[] = "misc_ut.txt", *str;
+  FILE *fp;
+  char line[512];
   int a[ROW_MAX][COL_MAX] = {{4, 5, 6, 7, 8, 10},
 			     {4, 5, 7, 8, 9, 10},
 			     {4, 5, 6, 8, 9, 10},
@@ -163,18 +184,50 @@ void misc()
 			     {101, 102, 103, 104, 105, 107},
 			     {11, 12, 13, 14, 15, 16}};
   unsigned int b[] = {10001, 10001, 5, 6, 9, 6, 1, 20001, 9, 20001};
-  int sum = 4, size = 3, count, i;
+  int sum = 4, size = 3, count, i = 0, x;
   int c[] = {1, 2, 3};
+  long month, day;
   
-  /* find missing numbers in a 2D array */
+  fp = fopen(file_name, "r");
+  if (fp == NULL) {
+    printf("Unable to open file\n");
+    return;
+  }
+
+  printf("1. Find missing number\n");
   find_missing(a);
-
-  /* find duplicated unsigned int using bit array */
-  find_duplicates(b, 10);
+  printf("\n\n");
   
-  /* test system's endianess */
+  printf("2. Find duplicates\n");
+  find_duplicates(b, 10);
+  printf("\n\n");
+  
+  printf("x. Endianess\n");
   endianess();
+  printf("\n\n");
 
+  printf("3. Combination\n");
   combo(sum, size, c);
+  printf("\n\n");
+
+  printf("4. Birthday cake\n");
+  fgets(line, 512, fp);
+  str = strtok(line, " ");
+  size = 0;
+  while (str) {
+    b[size++] = atoi(str);
+    str = strtok(line, " ");
+  }
+  DBG("%s", "b[]: ");
+  for (i = 0; i < size; i++) {
+    DBG("%d ", b[i]);
+  }
+  fgets(line, 512, fp);
+  month = strtol(strtok(line, " "), NULL, 10);
+  day = strtol(strtok(line, " "), NULL, 10);
+  count = birthday_cake(b, size, month, day);
+  printf("%d of %ld contiguous squares with sum %ld\n",
+	 count, month, day);
+  fclose(fp);
 }
 
