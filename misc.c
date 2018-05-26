@@ -172,6 +172,42 @@ int birthday_cake(unsigned int a[], int size, int month, int day)
   return matches;
 }
 
+/* TBD */
+static int fibonacci(int n)
+{
+  int i = 0, prev1 = 0, prev2 = 0, num = 0;
+
+  printf("%d numbers of the Fibonacci sequence: ", n);
+  while (i++ < n) {
+    num = prev1 + prev2;
+    if (prev1 == 0)
+      prev1 = 1;
+    else 
+      prev1 = prev2;
+    prev2 = num;
+    printf("%d ", num);
+  }
+  printf("\n");
+  return num;
+}
+
+/* Reverse an integer. Return 0 if the result is overflowed. */
+int reverse_int(int x)
+{
+  int y = 0;
+  long int z = 0;
+  
+  while (x) {
+    z = (long)y*10 + x%10;
+    if ((z > 0x7fffffff) || (z < (int)0x80000000)) {
+      return 0;
+    }
+    y = z;
+    x = x/10;
+  }
+  return y;
+}
+
 void misc()
 {
   char file_name[] = "misc_ut.txt", *str;
@@ -187,7 +223,12 @@ void misc()
   int sum = 4, size = 3, count, i = 0, x;
   int c[] = {1, 2, 3};
   long month, day;
+  int z[] = {1534236469, -2147483412, -10, 123};
   
+  for (i = 0; i < sizeof(z)/sizeof(int); i++) {
+    printf("%d is reversed of %d\n", reverse_int(z[i]), z[i]);
+  }
+    
   fp = fopen(file_name, "r");
   if (fp == NULL) {
     printf("Unable to open file\n");
@@ -222,6 +263,7 @@ void misc()
   for (i = 0; i < size; i++) {
     DBG("%d ", b[i]);
   }
+
   fgets(line, 512, fp);
   month = strtol(strtok(line, " "), NULL, 10);
   day = strtol(strtok(line, " "), NULL, 10);
@@ -229,5 +271,6 @@ void misc()
   printf("%d of %ld contiguous squares with sum %ld\n",
 	 count, month, day);
   fclose(fp);
+
 }
 

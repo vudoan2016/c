@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "list.h"
+#include "include/list.h"
+#include "include/debug.h"
+
+#define DEBUG 1
 
 void list_init(list_t **l)
 {
@@ -96,6 +99,7 @@ bool merged(node_t *head1, node_t *head2)
   return (cur2 != NULL);
 }
 
+/* Merge 2 singly linked lists at position 'position' from the head. */
 void list_merge(node_t *head1, node_t *head2, int position)
 {
   node_t *cur1 = head1, *cur2 = head2;
@@ -147,64 +151,54 @@ void print_reverse(node_t *head)
   printf("%d, ", head->data);
 }
 
-void list_test()
+/* remove the nth node from head */
+void *remove_nth(node_t **h, int nth)
 {
-  char data_file[] = "list_data.txt";
-  FILE *fp;
-  char input[512], *p, *token;
-  int data, position = 5, x = 200;
-  list_t *l = NULL, *l1 = NULL;
-  
-  list_init(&l);
-  list_init(&l1);
-  
-  if ((fp = fopen(data_file, "r")) == NULL) {
-    return;
+  node_t *n = *h, *p = NULL;
+  int i = 1;
+
+  while (n && i < nth) {
+    p = n;
+    n = n->next;
+    i++;
   }
 
-  if (fgets(input, 512, fp) != NULL) {
-    p = input;
-    while (token = strtok_r(p, " ", &p)) {
-      list_insert(l, atoi(token));
+  if (n && i == nth) {
+    printf("removing node with data %d\n", n->data);
+    if (p) {
+      p->next = n->next;
+    } else {
+      *h = n->next;
     }
+    free(n);
   }
-
-  if (fgets(input, 512, fp) != NULL) {
-    p = input;
-    while (token = strtok_r(p, " ", &p)) {
-      list_insert(l1, atoi(token));
-    }
-  }
-
-  printf("1. Remove duplicates\n");
-  print_list(l->head);
-  remove_duplicate(l->head);
-  print_list(l->head);
-  printf("\n\n");
-  
-  printf("2. Print in reversed order\n");
-  print_reverse(l->head);
-  printf("\n\n");
-  
-  printf("3. List is reversed\n");
-  reverse(&l->head);
-  print_list(l->head);
-  printf("\n\n");
-  
-  printf("4. Remove %d from list\n", x);
-  print_list(l1->head);
-  l1->head = list_remove(l1->head, 200);
-  print_list(l1->head);
-  printf("\n\n");
-
-  printf("5. Merge 2 lists\n");
-  list_merge(l->head, l1->head, position);
-  print_list(l->head);
-  print_list(l1->head);
-  printf("\n\n");
-
-  printf("6. Are lists merged?\n");
-  printf("%s", merged(l->head, l1->head) == true ? "yes" : "no");
-  printf("\n\n");
-
 }
+
+void remove_nth_from_tail(node_t **h, int nth)
+{
+  node_t *c = *h, *n = *h, *p = NULL;
+  int i = 0;
+  if (!c)
+    return;
+  while (c) {
+    if (i == nth-1) {
+      DBG("remove node %d from tail", nth);
+      if (c->next == NULL) {
+	if (p) {
+	  p->next = n->next;
+	} else {
+	  *h = n->next;
+	}
+	free(n);
+	break;
+      } else {
+	p = n;
+	n = n->next;
+      }
+    } else {
+      i++;
+    }
+    c = c->next;
+  }
+}
+

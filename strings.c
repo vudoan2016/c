@@ -136,21 +136,51 @@ char *multiplication(char *x, char *y)
   return prod;
 }
 
+/* Return index of substr in str. -1 if not found. */
+int index_of(char *str, char *substr)
+{
+  char *c = str;
+  int i;
+
+  if (!str || !substr || !strlen(substr))
+    return -1;
+  while (*c != '\0') {
+    if (*c == substr[0] && strlen(c) >= strlen(substr)) {
+      DBG("@c %p, @str %p", c, str);
+      for (i = 0; i < strlen(substr); i++) {
+	if (c[i] != substr[i]) {
+	  break;
+	}
+      }
+      if (i == strlen(substr)) {
+	return (c-str);
+      }
+    }
+    c++;
+  }
+  return -1;
+}
+
 void string_test()
 {
-  char x[LINE_MAX], y[LINE_MAX];
+  char x[LINE_MAX] = "hello", y[LINE_MAX];
   char *prod = NULL;
   char file[] = "string_ut.txt";
   FILE *fp = NULL;
   char buf[4*1024] = "";
-  char pattern[] = "aaa";
+  char substr[][100] = {"lol", "of", "hello world", "ll", "hell"};
+  char pattern[] = "ll";
   int matches = 0, i, count = 5;
 
   if ((fp = fopen(file, "r")) == NULL) {
     printf("Unable to open file %s\n", file);
     return;
   }
-  
+
+  for (i = 0; i < sizeof(substr)/100; i++) {
+    printf("index of '%s' in '%s' = %d\n", substr[i], x, index_of(x, substr[i]));
+  }
+
   printf("1. String multiplication\n");
   for (i = 0; i < count; i++) {
     fgets(x, LINE_MAX, fp);
