@@ -1,8 +1,10 @@
 Practicing C code
 gcc - o main -g -Wall main.c permute.c
 
+To use pow() API add -lm at the end of the gcc command.
+
 git init # create new repo locally
-git remote add origin https://github.com/vdoan2016/java.git
+git remote add origin https://github.com/vudoan2016/java.git
 
 git add main.c permutation.c
 git commit -m "Initial commit of string permutaion"

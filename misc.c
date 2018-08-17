@@ -26,18 +26,18 @@ static void find_missing(int a[ROW_MAX][COL_MAX])
     /* binary search for the missing number in each row */
     while (start <= middle && !found) {
       if (a[i][middle] != a[i][middle-1]+1) {
-	/* middle is the missing number */
-	found = true;
+        /* middle is the missing number */
+        found = true;
       } else if (a[i][middle] > a[i][0] + middle) {
-	/* The missing number is on the left of middle */
-	end = middle-1;
+        /* The missing number is on the left of middle */
+        end = middle-1;
       } else {
-	/* The missing number is on the right of middle */
-	start = middle+1;
+        /* The missing number is on the right of middle */
+        start = middle+1;
       }
       middle = (start + end)/2;
     }
-
+    
     /* The below printing (O(n)) defeats the purpose of the binary search (O(logn)).
      * The above logic should be in seperate function where it can be called
      * multiple times. 
@@ -46,7 +46,7 @@ static void find_missing(int a[ROW_MAX][COL_MAX])
     for (j = 0; j < COL_MAX; j++) {
       printf("%d", a[i][j]);
       if (j < COL_MAX-1) {
-	printf(", ");
+        printf(", ");
       }
     }
     printf("]: ");
@@ -113,7 +113,7 @@ int combo(int sum, int size, int *a)
       count++;
       printf("count = %d, {", count);
       for (k = 0; k <= i; k++) {
-	printf("%d ", seq[k]);
+        printf("%d ", seq[k]);
       }
       printf("}\n");
     }
@@ -122,34 +122,34 @@ int combo(int sum, int size, int *a)
       seq[ii] = a[ii];
       DBG("ii: %d, remain = %d", ii, remain);
       if (remain == 0) {
-	count++;
-	printf("count = %d, {", count);
-	for (k = 0; k <= ii; k++) {
-	  printf("%d ", seq[k]);
-	}
-	printf("}\n");
+        count++;
+        printf("count = %d, {", count);
+        for (k = 0; k <= ii; k++) {
+          printf("%d ", seq[k]);
+        }
+        printf("}\n");
       }
       for (j = ii+1; j < size && remain > a[j]; j++) {
-	seq[j] = a[j];
-	if (j < size-1) {
-	  remain -= a[j];
-	} else {
-	  remain -= remain % a[j];
-	}
-	DBG("j: %d, remain = %d", j, remain);
-	if (remain == 0) {
-	  count++;
-	  printf("count = %d, {", count);
-	  for (k = 0; k <= j; k++) {
-	    DBG("%d ", seq[k]);
-	  }
-	  printf("}\n");
-	}
+        seq[j] = a[j];
+        if (j < size-1) {
+          remain -= a[j];
+        } else {
+          remain -= remain % a[j];
+        }
+        DBG("j: %d, remain = %d", j, remain);
+        if (remain == 0) {
+          count++;
+          printf("count = %d, {", count);
+          for (k = 0; k <= j; k++) {
+            DBG("%d ", seq[k]);
+          }
+          printf("}\n");
+        }
       }
       remain = sum - a[i];
     }
   }
-
+  
   return count;
 }
 
@@ -214,11 +214,11 @@ void misc()
   FILE *fp;
   char line[512];
   int a[ROW_MAX][COL_MAX] = {{4, 5, 6, 7, 8, 10},
-			     {4, 5, 7, 8, 9, 10},
-			     {4, 5, 6, 8, 9, 10},
-			     {4, 5, 6, 7, 9, 10},
-			     {101, 102, 103, 104, 105, 107},
-			     {11, 12, 13, 14, 15, 16}};
+                             {4, 5, 7, 8, 9, 10},
+                             {4, 5, 6, 8, 9, 10},
+                             {4, 5, 6, 7, 9, 10},
+                             {101, 102, 103, 104, 105, 107},
+                             {11, 12, 13, 14, 15, 16}};
   unsigned int b[] = {10001, 10001, 5, 6, 9, 6, 1, 20001, 9, 20001};
   int sum = 4, size = 3, count, i = 0, x;
   int c[] = {1, 2, 3};
@@ -269,7 +269,7 @@ void misc()
   day = strtol(strtok(line, " "), NULL, 10);
   count = birthday_cake(b, size, month, day);
   printf("%d of %ld contiguous squares with sum %ld\n",
-	 count, month, day);
+         count, month, day);
   fclose(fp);
 
 }

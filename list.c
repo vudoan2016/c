@@ -48,6 +48,7 @@ void print_list(node_t *head)
 {
   node_t *cur = head;
   
+  printf("List: ");
   while (cur) {
     printf("%d", cur->data);
     cur = cur->next;
@@ -68,11 +69,11 @@ void remove_duplicate(node_t *head)
       tmp = cur;
       cur = cur->next;
       if (prev) {
-	prev->next = cur;
+        prev->next = cur;
       }
       /* delete the node that head is pointing to so update head */
       if (head == tmp) {
-	head = cur;
+        head = cur;
       }
       free(tmp);
     } else {
@@ -126,12 +127,13 @@ node_t* list_remove(node_t *head, int x)
     if (cur->data == x) {
       tmp = cur;
       cur = cur->next;
-      if (prev) {
-	prev->next = cur;
+      if (head == tmp) {
+        /* delete the node that head is pointing to so update head */
+        prev = cur;
+        head = cur;
+      } else {
+        prev->next = cur;
       }
-      /* delete the node that head is pointing to so update head */
-      if (head == tmp)
-	head = cur;
       free(tmp);
     } else {
       prev = cur;
@@ -184,21 +186,93 @@ void remove_nth_from_tail(node_t **h, int nth)
     if (i == nth-1) {
       DBG("remove node %d from tail", nth);
       if (c->next == NULL) {
-	if (p) {
-	  p->next = n->next;
-	} else {
-	  *h = n->next;
-	}
-	free(n);
-	break;
+          if (p) {
+              p->next = n->next;
+          } else {
+              *h = n->next;
+          }
+          free(n);
+          break;
       } else {
-	p = n;
-	n = n->next;
+          p = n;
+          n = n->next;
       }
     } else {
-      i++;
+        i++;
     }
     c = c->next;
   }
 }
 
+void list_test()
+{
+  char data_file[] = "list_data.txt";
+  FILE *fp;
+  char input[512], *p, *token;
+  int data, position = 5, x = 200;
+  list_t *l = NULL, *l1 = NULL;
+  
+  list_init(&l);
+  list_init(&l1);
+  
+  if ((fp = fopen(data_file, "r")) == NULL) {
+    return;
+  }
+
+  if (fgets(input, 512, fp) != NULL) {
+    p = input;
+    while (token = strtok_r(p, " ", &p)) {
+      list_insert(l, atoi(token));
+    }
+  }
+
+  if (fgets(input, 512, fp) != NULL) {
+    p = input;
+    while (token = strtok_r(p, " ", &p)) {
+      list_insert(l1, atoi(token));
+    }
+  }
+
+  print_list(l1->head);
+  position = 2;
+  remove_nth_from_tail(&l1->head, position);
+  print_list(l1->head);
+
+  print_list(l->head);
+  position = 25;
+  remove_nth(&l->head, position);
+  print_list(l->head);
+
+
+  printf("1. Remove duplicates\n");
+  print_list(l->head);
+  remove_duplicate(l->head);
+  print_list(l->head);
+  printf("\n\n");
+  
+  printf("2. Print in reversed order\n");
+  print_reverse(l->head);
+  printf("\n\n");
+  
+  printf("3. List is reversed\n");
+  reverse(&l->head);
+  print_list(l->head);
+  printf("\n\n");
+  
+  x = 100;
+  printf("4. Remove %d from list\n", x);
+  print_list(l1->head);
+  l1->head = list_remove(l1->head, x);
+  print_list(l1->head);
+  printf("\n\n");
+
+  printf("5. Merge 2 lists\n");
+  list_merge(l->head, l1->head, position);
+  print_list(l->head);
+  print_list(l1->head);
+  printf("\n\n");
+
+  printf("6. Are lists merged?\n");
+  printf("%s", merged(l->head, l1->head) == true ? "yes" : "no");
+  printf("\n\n");
+}

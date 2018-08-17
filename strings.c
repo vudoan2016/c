@@ -2,46 +2,47 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 #include "include/debug.h"
 
 #define DEBUG 0
 #define LINE_MAX 1024
 
 /*
- * Implement Rabin-Karp rolling hash algorithm. H = c1*a^k-1 + c2*a^k-2 + 
- * c3*a^k-3 ... where c is a character in the input str (c1c2c3...cn) and a 
- * is a constant and k is the length of the pattern. Essentially it means
- * that each character occupies 1 byte (if the base is 256). 
- * There is a problem with this algorithm. If the base is 256 then the pattern 
- * can only have 4 characters. Longer patterns will result in hash collision.
- * Text character starts with the 'space' (32) and ends with '~' (126).
- * https://brilliant.org/wiki/rabin-karp-algorithm/
- *
- * Output: the number of matches
- */
+* Implement Rabin-Karp rolling hash algorithm. H = c1*a^k-1 + c2*a^k-2 + 
+* c3*a^k-3 ... where c is a character in the input str (c1c2c3...cn) and a 
+* is a constant and k is the length of the pattern. Essentially it means
+* that each character occupies 1 byte (if the base is 256). 
+* There is a problem with this algorithm. If the base is 256 then the pattern 
+* can only have 4 characters. Longer patterns will result in hash collision.
+* Text character starts with the 'space' (32) and ends with '~' (126).
+* https://brilliant.org/wiki/rabin-karp-algorithm/
+*
+* Output: the number of matches
+*/
 int grep(char *pattern, char str[])
 {
   unsigned int i, k = strlen(pattern);
   int base = 64, matches = 0;
   unsigned int h = 0, pattern_h = 0;
   char *c;
-  
+
   if (k > strlen(str)) {
     return 0;
   }
-  
+
   for (i = 0; i < k; i++) {
     pattern_h += (pattern[i]-31)*pow(base, k-i-1);
-    //DBG("i: %d, c: %c (%d), pattern_h: %d", i, pattern[i], pattern[i], pattern_h);
+    DBG("i: %d, c: %c (%d), pattern_h: %d", i, pattern[i], pattern[i], pattern_h);
   }
-      
+  
   c = str;
   for (i = 0; i < k; i++) {
     h += (*c-31) * pow(base, k-i-1);
-    //DBG("i: %d, c: %c (%d), h: %d", i, *c, *c, h);
+    DBG("i: %d, c: %c (%d), h: %d", i, *c, *c, h);
     c++;
   }
-
+  
   i = 0;
   if (h == pattern_h) {
     matches++;
@@ -52,12 +53,12 @@ int grep(char *pattern, char str[])
     h -= (str[i]-31) * pow(base, k-1);
     h *= base;
     h += *c-31;
-    //DBG("c: %c (%d), h: %d", *c, *c, h);
+    DBG("c: %c (%d), h: %d", *c, *c, h);
     if (h == pattern_h) {
       matches++;
       DBG("found a match. key %d", h);
     }
-      
+    
     c++;
     i++;
   }
@@ -65,9 +66,9 @@ int grep(char *pattern, char str[])
 }
 
 /*
- * Replace duplicate letters by a number. For example, "abbbcccc" is 
- * represented as "a1b3c4."
- */
+* Replace duplicate letters by a number. For example, "abbbcccc" is 
+* represented as "a1b3c4."
+*/
 static void string_compress(char *str)
 {
   int dup = 0;
@@ -80,12 +81,12 @@ static void string_compress(char *str)
       dup++;
     } else {
       if (dup > 0) {
-	i += sprintf(&tmp[++i], "%d", dup);
-	tmp[i] = *c;
-	dup = 1;
+        i += sprintf(&tmp[++i], "%d", dup);
+        tmp[i] = *c;
+        dup = 1;
       } else {
-	tmp[i] = *c;
-	dup = 1;
+        tmp[i] = *c;
+        dup = 1;
       }
     }
     c++;
@@ -144,21 +145,129 @@ int index_of(char *str, char *substr)
 
   if (!str || !substr || !strlen(substr))
     return -1;
+
   while (*c != '\0') {
     if (*c == substr[0] && strlen(c) >= strlen(substr)) {
       DBG("@c %p, @str %p", c, str);
       for (i = 0; i < strlen(substr); i++) {
-	if (c[i] != substr[i]) {
-	  break;
-	}
+        if (c[i] != substr[i]) {
+          break;
+        }
       }
       if (i == strlen(substr)) {
-	return (c-str);
+        return (c-str);
       }
     }
     c++;
   }
   return -1;
+}
+
+/* Find the first non-repeating character in a string in O(n) */
+char first_non_repeating(char *str)
+{
+  char htb[256] = {0};
+  char *c = str;
+
+  while (c && *c != '\0') {
+    htb[*c] += 1;
+    c++;
+  }
+  c = str;
+  while (c && *c != '\0') {
+    if (htb[*c] == 1) {
+      return *c;
+    }
+    c++;
+  }
+  return *c;
+}
+
+/* 
+ * Print out the indices of all the anagrams of pattern 'p' in a string 's.'
+ * Eg, s=cbaebabacdef, p=abc prints out [0, 6] and s=abab, p=ab prints out [0, 1, 2]. 
+ * Todo: return an array of the indices and the size of the array as well. 
+ * The caller needs to free the array.
+ * int *anagram_indices(char *str, char *p, int *size)
+ */
+void anagram_indices(char *str, char *p) 
+{
+  unsigned char htbl[256] = {0};
+  char *c = p;
+  int i, j;
+  bool is_anagram = true;
+
+  for (i = 0; i <= strlen(str) - strlen(p); i++) {
+    c = p;
+    while (c && *c != '\0') {
+      htbl[*c]++;
+      c++;
+    }
+    is_anagram = true;
+    for (j = i; j < i+strlen(p); j++) {
+      if (htbl[str[j]] > 0) {
+        htbl[str[j]]--;
+      } else {
+        is_anagram = false;
+        DBG("Not an anagram %c", str[j]);
+        break;
+      }
+    }
+    if (is_anagram) {
+      c = p;
+      while (c && *c != '\0') {
+        if (htbl[*c] != 0) {
+          is_anagram = false;
+          DBG("Not an anagram %c", str[j]);
+          break;
+        }      
+        c++;
+      }
+      /* found an anagram */
+      if (is_anagram) {
+        printf("%d\n", i);
+      } else {
+        c = p;
+        while (c && *c != '\0') {
+          htbl[*c] = 0;
+          c++;
+        }
+      }
+    } else {
+      c = p;
+      while (c && *c != '\0') {
+        htbl[*c] = 0;
+        c++;
+      }
+    }
+  }
+}
+
+int longest_non_repeating_substring(char *str)
+{
+  unsigned int bit_array[256/32] = {0};
+  char *c = str, *p;
+  int max = 0, count = 0;
+
+  while (c && *c != '\0') {
+    p = c;
+    count = 0;
+    while (*p != '\0') {
+      if (bit_array[*p/32] & (1 << *p % 32)) {
+        if (count > max) {
+          max = count;
+          break; 
+        }
+      } else {
+        bit_array[*p/32] |= 1 << (*p % 32);
+        count++;
+      }
+      p++;
+    }
+    memset(bit_array, 0, sizeof(bit_array));
+    c++;
+  }
+  return max;
 }
 
 void string_test()
@@ -170,15 +279,11 @@ void string_test()
   char buf[4*1024] = "";
   char substr[][100] = {"lol", "of", "hello world", "ll", "hell"};
   char pattern[] = "ll";
-  int matches = 0, i, count = 5;
+  int matches = 0, i, count = 5, align = 5;
 
   if ((fp = fopen(file, "r")) == NULL) {
     printf("Unable to open file %s\n", file);
     return;
-  }
-
-  for (i = 0; i < sizeof(substr)/100; i++) {
-    printf("index of '%s' in '%s' = %d\n", substr[i], x, index_of(x, substr[i]));
   }
 
   printf("1. String multiplication\n");
@@ -192,7 +297,7 @@ void string_test()
     free(prod);
   }
   printf("\n\n");
-  
+
   printf("2. Compress a string\n");
   fgets(x, LINE_MAX, fp);
   /* get rid of EOL stored by fgets */
@@ -208,6 +313,30 @@ void string_test()
     matches += grep(pattern, buf);
   }
   printf("found %d match(es) of '%s' in file %s\n", matches, pattern, file);
+  printf("\n\n");
 
+  printf("4: index of substring\n");
+  for (i = 0; i < sizeof(substr)/100; i++) {
+    printf("index of '%s' in '%s' = %d\n", substr[i], x, index_of(x, substr[i]));
+  }
+
+  printf("\n\n");
+  strcpy(x, "wwhhaatt\'s uup");
+  printf("5: first non-repeating character in %s: %c\n", x, first_non_repeating(x));
+
+  printf("\n\n");
+  strcpy(x, "cbaebabacd");
+  strcpy(y, "abc");
+  printf("6: print indices of anagrams of \'%s\' in \'%s\'\n", y, x);
+  anagram_indices(x, y);
+
+  printf("\n\n");
+  printf("7: longest non-repeating substring\n");
+  /* TBD: alignment doesn't work */
+  printf("'%*s': %d\n", align, x, longest_non_repeating_substring(x));
+  strcpy(x, "pwwkew");
+  printf("'%2s': %d\n", x, longest_non_repeating_substring(x));
+  strcpy(x, "bbbb");
+  printf("'%2s': %d\n", x, longest_non_repeating_substring(x));
   fclose(fp);
 }

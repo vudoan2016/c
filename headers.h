@@ -9,5 +9,6 @@ void list_test();
 void misc();
 void string_test();
 void sort_test();
+void list_test();
 
 #endif
