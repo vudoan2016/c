@@ -98,6 +98,7 @@ static void find_duplicates(unsigned int a[], int size)
 }
 
 /*
+ * Todo: Generate all combinations of a set of coins. 
  * https://www.hackerrank.com/challenges/coin-change/problem
  */
 int combo(int sum, int size, int *a)
@@ -172,18 +173,18 @@ int birthday_cake(unsigned int a[], int size, int month, int day)
   return matches;
 }
 
-/* TBD */
+/* 
+ * Generate first n numbers of the Fibonacci sequence. 
+ * Todo: can this function do better than O(n)?
+ */ 
 static int fibonacci(int n)
 {
-  int i = 0, prev1 = 0, prev2 = 0, num = 0;
+  int i = 2, prev1 = 1, prev2 = 1, num = 0;
 
-  printf("%d numbers of the Fibonacci sequence: ", n);
+  printf("%d %d ", prev1, prev2);
   while (i++ < n) {
     num = prev1 + prev2;
-    if (prev1 == 0)
-      prev1 = 1;
-    else 
-      prev1 = prev2;
+    prev1 = prev2;
     prev2 = num;
     printf("%d ", num);
   }
@@ -208,6 +209,33 @@ int reverse_int(int x)
   return y;
 }
 
+/* Todo */
+int *fair_swap(int *a, int sizeA, int *b, int sizeB, int *ansSize)
+{
+  int i, j, sumA = 0, sumB = 0;
+  int *ans;
+
+  ans = (int *)calloc(1, 2*sizeof(int));
+  for (i = 0; i < sizeA; i++) {
+    sumA += a[i];
+  } 
+  for (i = 0; i < sizeB; i++) {
+    sumB += b[i];
+  }
+
+  for (i = 0; i < sizeA; i++) {
+    for (j = 0; j < sizeB; j++) {
+      if (sumA - a[i] + b[j] == sumB + a[i] - b[j]) {
+        ans[0] = a[i];
+        ans[1] = b[j];
+        *ansSize = 2;
+        break;
+      }
+    }
+  }
+  return ans;
+}
+
 void misc()
 {
   char file_name[] = "misc_ut.txt", *str;
@@ -224,7 +252,7 @@ void misc()
   int c[] = {1, 2, 3};
   long month, day;
   int z[] = {1534236469, -2147483412, -10, 123};
-  
+
   for (i = 0; i < sizeof(z)/sizeof(int); i++) {
     printf("%d is reversed of %d\n", reverse_int(z[i]), z[i]);
   }
@@ -253,15 +281,12 @@ void misc()
 
   printf("4. Birthday cake\n");
   fgets(line, 512, fp);
+  DBG("%s\n", line);
   str = strtok(line, " ");
   size = 0;
   while (str) {
     b[size++] = atoi(str);
-    str = strtok(line, " ");
-  }
-  DBG("%s", "b[]: ");
-  for (i = 0; i < size; i++) {
-    DBG("%d ", b[i]);
+    str = strtok(NULL, " ");
   }
 
   fgets(line, 512, fp);
@@ -270,7 +295,20 @@ void misc()
   count = birthday_cake(b, size, month, day);
   printf("%d of %ld contiguous squares with sum %ld\n",
          count, month, day);
-  fclose(fp);
 
+  printf("\n\n");
+  printf("5. Fair swap\n");
+  int a_candies[] = {1, 2, 5};
+  int b_candies[] = {2, 4};
+  int *result, res_size; 
+  result = fair_swap(a_candies, 3, b_candies, 2, &res_size); 
+  printf("A's swap: %d, B's swap: %d\n", result[0], result[1]);
+  free(result);
+  
+  printf("\n\n");
+  printf("6. Fibonacci sequence: ");
+  fibonacci(10);
+  
+  fclose(fp);
 }
 

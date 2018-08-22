@@ -56,9 +56,9 @@ node_t *avl_insert(node_t *root, int key)
       y->height = avl_max_height(y->left, y->right) + 1;
       x->height = avl_max_height(x->left, x->right) + 1;
       DBG("x=%d, h=%d, left=%d, right=%d", x->key, x->height, x->left ? x->left->key : -1,
-	  x->right ? x->right->key : -1);
+          x->right ? x->right->key : -1);
       DBG("y=%d, h=%d, left=%d, right=%d", y->key, y->height, y->left ? y->left->key : -1,
-	  y->right ? y->right->key : -1);
+          y->right ? y->right->key : -1);
       
       /* rotate right */
       DBG("... %s", "rotate right");
@@ -69,11 +69,11 @@ node_t *avl_insert(node_t *root, int key)
       y->height = avl_max_height(y->left, y->right) + 1;
       x->height = avl_max_height(x->left, x->right) + 1;
       DBG("x=%d, h=%d, left=%d, right=%d", x->key, x->height, x->left ? x->left->key : -1,
-	  x->right ? x->right->key : -1);
+          x->right ? x->right->key : -1);
       DBG("y=%d, h=%d, left=%d, right=%d", y->key, y->height, y->left ? y->left->key : -1,
-	  y->right ? y->right->key : -1);
+          y->right ? y->right->key : -1);
       DBG("root=%d, h=%d, left=%d, right=%d", root->key, root->height, root->left ? root->left->key : -1,
-	  root->right ? root->right->key : -1);
+          root->right ? root->right->key : -1);
       return x;
     } else {
       /* rotate right */
@@ -91,8 +91,8 @@ node_t *avl_insert(node_t *root, int key)
       /* rotate right */
       x = y->left;
       DBG("Rotate right: root %d, left %d, right %d, y %d, x %d",
-	  root->key, root->left ? root->left->key : -1,
-	  root->right ? root->right->key : -1, y->key, x->key);
+          root->key, root->left ? root->left->key : -1,
+          root->right ? root->right->key : -1, y->key, x->key);
       y->left = x->right;
       x->right = y;
       root->right = x;

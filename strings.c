@@ -279,7 +279,7 @@ void string_test()
   char buf[4*1024] = "";
   char substr[][100] = {"lol", "of", "hello world", "ll", "hell"};
   char pattern[] = "ll";
-  int matches = 0, i, count = 5, align = 5;
+  int matches = 0, i, count = 5, align = 12;
 
   if ((fp = fopen(file, "r")) == NULL) {
     printf("Unable to open file %s\n", file);
@@ -332,11 +332,10 @@ void string_test()
 
   printf("\n\n");
   printf("7: longest non-repeating substring\n");
-  /* TBD: alignment doesn't work */
-  printf("'%*s': %d\n", align, x, longest_non_repeating_substring(x));
+  printf("%*s: %d\n", align, x, longest_non_repeating_substring(x));
   strcpy(x, "pwwkew");
-  printf("'%2s': %d\n", x, longest_non_repeating_substring(x));
+  printf("%*s: %d\n", align, x, longest_non_repeating_substring(x));
   strcpy(x, "bbbb");
-  printf("'%2s': %d\n", x, longest_non_repeating_substring(x));
+  printf("%*s: %d\n", align, x, longest_non_repeating_substring(x));
   fclose(fp);
 }

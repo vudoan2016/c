@@ -46,7 +46,7 @@ bool heap_insert(heap_t *h, heap_node_t *elem)
     cur = h->last;
     parent = h->last/2;
     while (cur > 1 &&
-	   (heap_key_compare(&h->node[cur], &h->node[parent]) < 0)) {
+          (heap_key_compare(&h->node[cur], &h->node[parent]) < 0)) {
       swap(&h->node[cur], &h->node[parent]);
       cur = parent;
       parent = cur/2;
@@ -81,7 +81,7 @@ heap_node_t *heap_delete(heap_t *h)
       cur = left_child;
     }
     if (right_child < h->last &&
-	(heap_key_compare(&h->node[cur], &h->node[right_child]) > 0)) {
+        (heap_key_compare(&h->node[cur], &h->node[right_child]) > 0)) {
       cur = right_child;
     }
 
@@ -124,12 +124,12 @@ void heap_print(heap_t *h)
    
    if (fp) {
      while (!feof(fp)) {
-       if (fscanf(fp, "%d", &elem.key) == 1) {
-	 heap_insert(h, &elem);
-	 heap_print(h);
-       }
+      if (fscanf(fp, "%d", &elem.key) == 1) {
+        heap_insert(h, &elem);
+        heap_print(h);
+      }
      }
-
+     
      while (h->last > 1) {
        elem_p = heap_delete(h);
        printf("min %d\n", elem_p->key);

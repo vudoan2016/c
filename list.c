@@ -84,6 +84,7 @@ void remove_duplicate(node_t *head)
   }
 }
 
+/* check if 2 lists are merged */
 bool merged(node_t *head1, node_t *head2)
 {
   node_t *cur1 = head1, *cur2 = head2;

@@ -9,15 +9,14 @@ static void list_ut();
 
 int main()
 {
-  string_test();
-
-#if 0
   list_test();
+#if 0
   misc();
+  tree_test();
+  string_test();
   graph_test();
   permutation_test();
   heap_test();
-  tree_test();
   sort_test();
 #endif
   

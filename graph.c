@@ -35,8 +35,8 @@ static void bfs(vertex_t adj[][MAX_VERTICES], int vertex)
     v = dequeue(q);
     for (i = 0; i < MAX_VERTICES; i++) {
       if (adj[v][i].weight && !adj[i][0].visited) {
-	enqueue(q, i);
-	adj[i][0].visited = true;
+        enqueue(q, i);
+        adj[i][0].visited = true;
       }
     }
     printf("%d\n", v);
@@ -80,17 +80,17 @@ void find_shortest_path(adj_list_t *adj[MAX_VERTICES], int source)
       neighbor = adj[node_p->data]->neighbor;
       adj[node_p->data]->visited = true;
       while (neighbor) {
-	new_dist = adj[node_p->data]->dist + neighbor->weight;
-	if (new_dist < adj[neighbor->vertex]->dist) {
-	  adj[neighbor->vertex]->dist = new_dist;
-	  adj[neighbor->vertex]->previous = node_p->data;
-	}
-	if (adj[neighbor->vertex]->visited == false) {
-	  node.key = adj[neighbor->vertex]->dist;
-	  node.data = neighbor->vertex;
-	  heap_insert(h, &node);
-	}
-	neighbor = neighbor->next;
+        new_dist = adj[node_p->data]->dist + neighbor->weight;
+        if (new_dist < adj[neighbor->vertex]->dist) {
+          adj[neighbor->vertex]->dist = new_dist;
+          adj[neighbor->vertex]->previous = node_p->data;
+        }
+        if (adj[neighbor->vertex]->visited == false) {
+          node.key = adj[neighbor->vertex]->dist;
+          node.data = neighbor->vertex;
+          heap_insert(h, &node);
+        }
+        neighbor = neighbor->next;
       }
     }
   }
@@ -108,8 +108,8 @@ void print_shortest_path(adj_list_t *adj[MAX_VERTICES])
       
       i = adj[dst]->previous;
       while (adj[i]->dist != 0) {
-	printf("%d, ", i);
-	i = adj[i]->previous;
+        printf("%d, ", i);
+        i = adj[i]->previous;
       }
       printf("%d\n", i);
     }
@@ -117,7 +117,7 @@ void print_shortest_path(adj_list_t *adj[MAX_VERTICES])
 }
 
 void adj_list_add_vertex(adj_list_t *adj[MAX_VERTICES], int vertex,
-			int neighbor, int weight)
+                         int neighbor, int weight)
 {
   neighbor_t *neighbor_p;
 
@@ -143,8 +143,8 @@ static void adj_list_print(adj_list_t *adj[MAX_VERTICES])
       printf("Vertex: %d, neighbors at ", adj[i]->vertex);
       neighbor = adj[i]->neighbor;
       while (neighbor) {
-	printf("(v:%d, w:%d), ", neighbor->vertex, neighbor->weight);
-	neighbor = neighbor->next;
+        printf("(v:%d, w:%d), ", neighbor->vertex, neighbor->weight);
+        neighbor = neighbor->next;
       }
       printf("\n");
     }
