@@ -150,7 +150,7 @@ bool tree_is_bst(node_t *root)
 }
 
 /* 
- * Todo: find the longest path to a leaf node in a tree assuming that 
+ * Find the longest path to a leaf node in a tree assuming that 
  * each node doesn't keep track of the height.
  */
 int longest_path(node_t *root)

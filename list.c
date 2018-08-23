@@ -68,12 +68,12 @@ void remove_duplicate(node_t *head)
     if (ba[(unsigned int)(cur->data)>>5] & (1 << (unsigned int)(cur->data)%32)) {
       tmp = cur;
       cur = cur->next;
-      if (prev) {
-        prev->next = cur;
-      }
       /* delete the node that head is pointing to so update head */
       if (head == tmp) {
         head = cur;
+        prev = cur;
+      } else {
+        prev->next = cur;
       }
       free(tmp);
     } else {
@@ -121,27 +121,27 @@ void list_merge(node_t *head1, node_t *head2, int position)
   }
 }
 
-node_t* list_remove(node_t *head, int x)
+/* remove all nodes which have data == x */
+void list_remove(node_t **head, int x)
 {
-  node_t *prev = NULL, *cur = head, *tmp;
+  node_t *prev = NULL, *cur = *head, *tmp;
   while (cur) {
     if (cur->data == x) {
+      if (*head == cur) {
+        /* delete the node that head is pointing to so update head */
+        prev = cur->next;
+        *head = cur->next;
+      } else {
+        prev->next = cur->next;
+      }
       tmp = cur;
       cur = cur->next;
-      if (head == tmp) {
-        /* delete the node that head is pointing to so update head */
-        prev = cur;
-        head = cur;
-      } else {
-        prev->next = cur;
-      }
       free(tmp);
     } else {
       prev = cur;
       cur = cur->next;
     }
   }
-  return head;
 }
 
 void print_reverse(node_t *head)
@@ -263,7 +263,7 @@ void list_test()
   x = 100;
   printf("4. Remove %d from list\n", x);
   print_list(l1->head);
-  l1->head = list_remove(l1->head, x);
+  list_remove(&l1->head, x);
   print_list(l1->head);
   printf("\n\n");
 
