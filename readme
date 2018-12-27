@@ -16,3 +16,7 @@ git status
 
 Allow core file to be generated "ulimit -c unlimited"
 
+On Windows: 
+g++ new.cpp # to compile c++ files
+gcc new.c # to compile c files
+
