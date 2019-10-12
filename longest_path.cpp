@@ -1,5 +1,5 @@
 #include <iostream>
-#include <stack>
+#include <vector>
 
 using namespace std;
 
@@ -33,38 +33,62 @@ void Print(TreeNode *root)
 	}
 }
 
-int LongestPath(TreeNode *root)
+vector<TreeNode*> LongestPath(TreeNode *root)
 {
-	stack<TreeNode*> s;
+	vector<TreeNode*> v, longest;
 	TreeNode *last = NULL;
-	int longest = 0;
 
 	if (root == NULL)
 		return longest;
 
-	s.push(root);
-	while (!s.empty()) {
-		if (s.top()->left && s.top()->left != last && s.top()->right != last) {
-			s.push(s.top()->left);
-		} else if (s.top()->right && s.top()->right != last) {
-			s.push(s.top()->right);
+	v.push_back(root);
+	while (!v.empty()) {
+		if (v.back()->left && v.back()->left != last && v.back()->right != last) {
+			v.push_back(v.back()->left);
+		} else if (v.back()->right && v.back()->right != last) {
+			v.push_back(v.back()->right);
 		} else {
-			if (s.size() > longest) {
-				longest = s.size();
+			if (v.size() > longest.size()) {
+				longest = v;
 			}
-			last = s.top();
-			s.pop();
+			last = v.back();
+			v.pop_back();
 		}
 	}
 	return longest;
 }
 
-int LongestPathRecursion(TreeNode *root)
+vector<TreeNode*> LongestPathRecursion(TreeNode *root)
+{
+	vector<TreeNode*> v;
+
+	if (root == NULL)
+		return v;
+
+	if (root->left == NULL && root->right == NULL) {
+		v.push_back(root);
+		return v;
+	} else {
+		vector<TreeNode*> left = LongestPathRecursion(root->left);
+		vector<TreeNode*> right = LongestPathRecursion(root->right);
+		if (left.size() > right.size() && right.size()) {
+			left.push_back(root);
+			return left;
+		} else {
+			right.push_back(root);
+			return right;
+		}
+	}
+}
+
+void Delete(TreeNode *root)
 {
 	if (root == NULL)
-		return 0;
+		return;
 	else {
-		return max(LongestPathRecursion(root->left) + 1, LongestPathRecursion(root->right) + 1);
+		Delete(root->left);
+		Delete(root->right);
+		delete root;
 	}
 }
 
@@ -79,10 +103,17 @@ int main()
 	Insert(root, 25);
 	Insert(root, 22);
 	Insert(root, 30);
-	Insert(root, 28);
+	Insert(root, 33);
 	Insert(root, 40);
 
 	Print(root);
 	cout << endl;
-	cout << "Longest path: " << LongestPath(root) << endl;
+	vector<TreeNode*> longest = LongestPathRecursion(root);
+	cout << "Longest path: " << longest.size() << endl;
+	for (vector<TreeNode*>::iterator it = longest.begin(); it != longest.end(); it++) {
+		cout << (*it)->key << ", ";
+	}
+	cout << endl;
+
+	Delete(root);
 }
